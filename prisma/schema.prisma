@@ -1,14 +1,64 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // Or your database provider
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id_user      String                 @id @default(uuid())
+  email        String                 @unique
+  full_name    String
+  password     String
+  created_at   DateTime               @default(now())
+  transactions FishStockTransaction[]
+
+  @@map("user")
+}
+
+model Warehouse {
+  id_warehouse Int                    @id @default(autoincrement())
+  name         String
+  fishes       Fish[]
+  transactions FishStockTransaction[]
+
+  @@map("warehouse")
+}
+
+model Fish {
+  id_fish      String                 @id
+  type         String
+  quantity     Int
+  min_stock    Int
+  max_stock    Int
+  warehouse    Warehouse              @relation(fields: [warehouse_id], references: [id_warehouse])
+  warehouse_id Int
+  transactions FishStockTransaction[]
+
+  @@unique([id_fish, warehouse_id])
+  @@map("fish")
+}
+
+model FishStockTransaction {
+  id_fish_stock_transaction Int             @id @default(autoincrement())
+  fish                      Fish            @relation(fields: [fish_id, warehouse_id], references: [id_fish, warehouse_id])
+  fish_id                   String
+  warehouse                 Warehouse       @relation(fields: [warehouse_id], references: [id_warehouse])
+  warehouse_id              Int
+  quantity                  Int
+  transaction_type          TransactionType
+  created_at                DateTime        @default(now())
+  updated_at                DateTime        @default(now())
+  updated_by                User            @relation(fields: [updated_by_id], references: [id_user])
+  updated_by_id             String
+
+  @@index([fish_id, warehouse_id, created_at])
+  @@map("fish_stock_transaction")
+}
+
+enum TransactionType {
+  IN
+  OUT
 }
