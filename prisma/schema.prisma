@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -20,19 +21,19 @@ model User {
 }
 
 model Warehouse {
-  id_warehouse Int                    @id @default(autoincrement())
+  id_warehouse Int         @id @default(autoincrement())
   name         String
   fishes       FishStock[]
-  transactions FishStockTransaction[]
+  // transactions FishStockTransaction[]
 
   @@map("warehouse")
 }
 
 model Fish {
-  id_fish              String                 @id @unique
-  type                 String                 @unique
-  FishStock            FishStock[]
-  FishStockTransaction FishStockTransaction[]
+  id_fish   String      @id @unique
+  type      String      @unique
+  FishStock FishStock[]
+  // FishStockTransaction FishStockTransaction[]
 
   @@map("fish")
 }
@@ -53,20 +54,37 @@ model FishStock {
 
 model FishStockTransaction {
   id_fish_stock_transaction Int             @id @default(autoincrement())
-  fish                      Fish            @relation(fields: [fish_id], references: [id_fish])
-  fish_id                   String
-  warehouse                 Warehouse       @relation(fields: [warehouse_id], references: [id_warehouse])
-  warehouse_id              Int
+  // fish                      Fish            @relation(fields: [fish_id], references: [id_fish])
+  // fish_id                   String
+  // warehouse                 Warehouse       @relation(fields: [warehouse_id], references: [id_warehouse])
+  // warehouse_id              Int
   quantity                  Int
   transaction_type          TransactionType
   created_at                DateTime        @default(now())
   updated_at                DateTime        @default(now())
-  updated_by                User            @relation(fields: [updated_by_id], references: [id_user])
-  updated_by_id             String
-  FishStock                 FishStock?      @relation(fields: [fish_stock_id_fish_stock], references: [id_fish_stock])
-  fish_stock_id_fish_stock  String?
+  updated_by                String
+  updated_by_id             User            @relation(fields: [updated_by], references: [id_user])
+  FishStock                 FishStock?      @relation(fields: [fish_stock_id], references: [id_fish_stock])
+  fish_stock_id             String?
 
   @@map("fish_stock_transaction")
+}
+
+view FishTransaction {
+  id_fish_stock_transaction Int @unique
+  fish_id                   String
+  fish_type                 String
+  warehouse_id              Int
+  quantity                  Int
+  transaction_type          TransactionType
+  created_at                DateTime
+  updated_at                DateTime
+  updated_by                String
+  updated_by_id             String
+  warehouse_name            String
+  fish_stock_id             String
+
+  @@map("fish_transaction_view")
 }
 
 enum TransactionType {
