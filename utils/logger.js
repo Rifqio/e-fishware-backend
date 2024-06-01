@@ -1,5 +1,30 @@
 const winston = require('winston');
 
+const customLevels = {
+    levels: {
+        error: 0,
+        warn: 1,
+        info: 2,
+        http: 3,
+        verbose: 4,
+        debug: 5,
+        silly: 6,
+        query: 7 
+    },
+    colors: {
+        error: 'red',
+        warn: 'yellow',
+        info: 'green',
+        http: 'green',
+        verbose: 'cyan',
+        debug: 'blue',
+        silly: 'gray',
+        query: 'magenta' 
+    }
+};
+
+winston.addColors(customLevels.colors);
+
 const customTimestampFormat = winston.format((info) => {
     info.timestamp = new Date().toLocaleString('en-US', {
         weekday: 'long',
@@ -15,14 +40,16 @@ const customTimestampFormat = winston.format((info) => {
 })();
 
 const Logger = winston.createLogger({
-    level: 'debug',
+    levels: customLevels.levels,
+    level: 'query',
     format: winston.format.combine(
         customTimestampFormat,
-        winston.format.colorize(),
+        winston.format.colorize({ level: true }),
         winston.format.printf(({ timestamp, level, message }) => {
             return `${timestamp} ${level}: ${message}`;
         })
     ),
+    defaultMeta: { service: 'user-service' },
     transports: [new winston.transports.Console()],
 });
 

@@ -3,47 +3,57 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Or your database provider
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id_user      String                 @id @default(uuid())
   email        String                 @unique
+  employee_id  String                 @unique
   full_name    String
   password     String
   created_at   DateTime               @default(now())
   transactions FishStockTransaction[]
 
-  @@map("user")
+  @@map("users")
 }
 
 model Warehouse {
   id_warehouse Int                    @id @default(autoincrement())
   name         String
-  fishes       Fish[]
+  fishes       FishStock[]
   transactions FishStockTransaction[]
 
   @@map("warehouse")
 }
 
 model Fish {
-  id_fish      String                 @id
-  type         String
-  quantity     Int
-  min_stock    Int
-  max_stock    Int
-  warehouse    Warehouse              @relation(fields: [warehouse_id], references: [id_warehouse])
-  warehouse_id Int
-  transactions FishStockTransaction[]
+  id_fish              String                 @id @unique
+  type                 String                 @unique
+  FishStock            FishStock[]
+  FishStockTransaction FishStockTransaction[]
 
-  @@unique([id_fish, warehouse_id])
   @@map("fish")
+}
+
+model FishStock {
+  id_fish_stock String                 @id
+  fish          Fish                   @relation(fields: [fish_type], references: [type])
+  fish_type     String
+  warehouse     Warehouse              @relation(fields: [warehouse_id], references: [id_warehouse])
+  warehouse_id  Int
+  quantity      Int
+  min_stock     Int
+  max_stock     Int
+  transactions  FishStockTransaction[]
+
+  @@map("fish_stock")
 }
 
 model FishStockTransaction {
   id_fish_stock_transaction Int             @id @default(autoincrement())
-  fish                      Fish            @relation(fields: [fish_id, warehouse_id], references: [id_fish, warehouse_id])
+  fish                      Fish            @relation(fields: [fish_id], references: [id_fish])
   fish_id                   String
   warehouse                 Warehouse       @relation(fields: [warehouse_id], references: [id_warehouse])
   warehouse_id              Int
@@ -53,8 +63,9 @@ model FishStockTransaction {
   updated_at                DateTime        @default(now())
   updated_by                User            @relation(fields: [updated_by_id], references: [id_user])
   updated_by_id             String
+  FishStock                 FishStock?      @relation(fields: [fish_stock_id_fish_stock], references: [id_fish_stock])
+  fish_stock_id_fish_stock  String?
 
-  @@index([fish_id, warehouse_id, created_at])
   @@map("fish_stock_transaction")
 }
 
