@@ -1,9 +1,17 @@
-const { Logger } = require("../utils/logger");
+const { Logger } = require('../utils/logger');
 
 const RequestLogger = (req, res, next) => {
     const start = new Date();
     const { method, url } = req;
-    const requestStartLog = `${method} ${url} - Request`;
+
+    let requestStartLog = '';
+    if (method === 'POST') {
+        requestStartLog = `${method} ${url} | payload : ${JSON.stringify(
+            req.body
+        )}`;
+    }
+    
+    requestStartLog = `${method} ${url}`;
 
     Logger.http(requestStartLog);
 
