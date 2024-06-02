@@ -23,7 +23,7 @@ const Register = async (req, res) => {
         const user = await AuthService.RegisterUser(req.body);
         const token = AuthService.GenerateAuthToken({
             name: user.full_name,
-            user_id: user.user_id,
+            user_id: user.id_user,
             email: user.email,
         });
 
@@ -33,6 +33,7 @@ const Register = async (req, res) => {
                 profile: {
                     name: user.full_name,
                     email: user.email,
+                    employee_id: user.employee_id,
                     user_id: user.user_id,
                 },
             },
@@ -60,7 +61,7 @@ const Login = async (req, res) => {
 
         const token = AuthService.GenerateAuthToken({
             name: user.full_name,
-            user_id: user.id,
+            user_id: user.id_user,
             email: user.email,
         });
 
@@ -70,7 +71,7 @@ const Login = async (req, res) => {
                 profile: {
                     name: user.full_name,
                     email: user.email,
-                    user_id: user.id,
+                    user_id: user.id_user,
                 },
             },
             'User logged in successfully'

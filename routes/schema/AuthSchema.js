@@ -34,6 +34,12 @@ const RegisterSchema = checkSchema({
             errorMessage: 'Full name cannot be empty',
         },
     },
+    employee_id: {
+        in: ['body'],
+        notEmpty: {
+            errorMessage: 'Employee ID cannot be empty',
+        },
+    },
     password: {
         in: ['body'],
         isLength: {

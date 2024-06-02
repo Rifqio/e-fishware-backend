@@ -1,6 +1,5 @@
 const { toInteger } = require('lodash');
 const DB = require('../utils/database');
-const { connect } = require('../routes/FishRoute');
 
 const GetFish = async (type, warehouseId) => {
     const intWarehouseId = toInteger(warehouseId);

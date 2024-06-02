@@ -24,3 +24,8 @@ app.listen(port, async () => {
     await DB.$connect();
     Logger.info('Server is running on port ' + port);
 });
+
+process.on('unhandledRejection', (error) => {
+    Logger.error('Unhandled Rejection: ' + error.message);
+    process.exit(1);
+})

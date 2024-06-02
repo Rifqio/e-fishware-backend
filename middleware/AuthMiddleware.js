@@ -5,7 +5,7 @@ const { Logger } = require('../utils/logger');
 const AuthVerify = async (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return BaseResponse(res).unauthorized();
     }
 
     try {

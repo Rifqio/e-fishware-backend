@@ -16,11 +16,12 @@ const CheckRepeatPassword = async (password, repeatPassword) => {
 }
 
 const RegisterUser = async (data) => {
-    const { email, password, full_name } = data;
+    const { email, password, full_name, employee_id } = data;
     const hashedPassword = await bcrypt.hash(password, 10);
     return await DB.user.create({
         data: {
             email: email,
+            employee_id: employee_id,
             password: hashedPassword,
             full_name: full_name,
         },

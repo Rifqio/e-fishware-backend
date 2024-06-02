@@ -94,37 +94,9 @@ const AddFishType = checkSchema({
     },
 });
 
-const AddFishTransaction = checkSchema({
-    fish_stock_id: {
-        in: ['body'],
-        isString: {
-            errorMessage: 'fish_stock_id must be a string',
-        },
-        notEmpty: {
-            errorMessage: 'fish_stock_id cannot be empty',
-        },
-    },
-    quantity: {
-        in: ['body'],
-        isInt: {
-            errorMessage: 'quantity must be an integer',
-        },
-        notEmpty: {
-            errorMessage: 'quantity cannot be empty',
-        },
-    },
-    transaction_type: {
-        in: ['body'],
-        contains: {
-            options: [['IN', 'OUT']],
-            errorMessage: 'transaction_type must be either IN or OUT',
-        },
-    },
-});
 
 module.exports = {
     GetFishSchema,
-    AddFishTransaction,
     AddFishStock,
     AddFishType,
 };
