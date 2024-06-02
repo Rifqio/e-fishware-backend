@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const { Logger } = require('./utils/logger');
 const HttpLogger = require('./middleware/HttpLoggerMiddleware');
+const ResponseMiddleware = require('./middleware/ResponseMiddleware');
 const DB = require('./utils/database');
 const routes = require('./routes');
 
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(ResponseMiddleware);
 app.use(HttpLogger);
 app.use('/api', routes);
 

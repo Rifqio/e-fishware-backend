@@ -1,7 +1,6 @@
 const { isEmpty } = require('lodash');
 const bcrypt = require('bcrypt');
 
-const BaseResponse = require('../utils/response');
 const { Logger } = require('../utils/logger');
 const AuthService = require('../service/AuthService');
 
@@ -12,12 +11,15 @@ const Register = async (req, res) => {
     try {
         const findExistingUser = await AuthService.FindExistingUser(email);
         if (!isEmpty(findExistingUser)) {
-            return BaseResponse(res).forbidden('User already exists');
+            return res.forbidden('User already exists');
         }
 
-        const isPasswordMatch = await AuthService.CheckRepeatPassword(password, repeat_password);
+        const isPasswordMatch = await AuthService.CheckRepeatPassword(
+            password,
+            repeat_password
+        );
         if (!isPasswordMatch) {
-            return BaseResponse(res).badRequest('Password does not match');
+            return res.badRequest('Password does not match');
         }
 
         const user = await AuthService.RegisterUser(req.body);
@@ -27,7 +29,7 @@ const Register = async (req, res) => {
             email: user.email,
         });
 
-        return BaseResponse(res).createdWithData(
+        return res.createdWithData(
             {
                 token,
                 profile: {
@@ -41,7 +43,7 @@ const Register = async (req, res) => {
         );
     } catch (error) {
         Logger.error(`[${Namespace}::register] | Error: ${error.message}`);
-        return BaseResponse(res).internalServerError();
+        return res.internalServerError();
     }
 };
 
@@ -51,12 +53,12 @@ const Login = async (req, res) => {
         const user = await AuthService.FindExistingUser(email);
 
         if (isEmpty(user)) {
-            return BaseResponse(res).unauthorized('Invalid credentials');
+            return res.unauthorized('Invalid credentials');
         }
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
-            return BaseResponse(res).unauthorized('Invalid credentials');
+            return res.unauthorized('Invalid credentials');
         }
 
         const token = AuthService.GenerateAuthToken({
@@ -65,7 +67,7 @@ const Login = async (req, res) => {
             email: user.email,
         });
 
-        return BaseResponse(res).successWithData(
+        return res.successWithData(
             {
                 token,
                 profile: {
@@ -78,7 +80,7 @@ const Login = async (req, res) => {
         );
     } catch (error) {
         Logger.error(`[${Namespace}::login] | Error: ${error.message}`);
-        return BaseResponse(res).internalServerError();
+        return res.internalServerError();
     }
 };
 
