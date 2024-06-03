@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const { TransactionType } = require('../utils/constants');
 const DB = require('../utils/database');
+const { ConstructDateRange } = require('../utils/helpers');
 const moment = require('moment');
 
 const ValidateFishStock = async (fishStockId) => {
@@ -76,51 +77,6 @@ const DeductFishStock = async (payload, currentQuantity) => {
     return transcation;
 };
 
-const constructDateRange = (year, month, date) => {
-    let startDate, endDate;
-
-    if (year) {
-        startDate = moment().year(year).startOf('year');
-        endDate = moment().year(year).endOf('year');
-
-        if (month) {
-            startDate = moment(startDate)
-                .month(month - 1)
-                .startOf('month');
-            endDate = moment(endDate)
-                .month(month - 1)
-                .endOf('month');
-        }
-
-        if (date) {
-            startDate = moment(startDate).date(date).startOf('day');
-            endDate = moment(endDate).date(date).endOf('day');
-        }
-    } else {
-        startDate = moment().startOf('year');
-        endDate = moment().endOf('year');
-
-        if (month) {
-            startDate = moment(startDate)
-                .month(month - 1)
-                .startOf('month');
-            endDate = moment(endDate)
-                .month(month - 1)
-                .endOf('month');
-        }
-
-        if (date) {
-            startDate = moment(startDate).date(date).startOf('day');
-            endDate = moment(endDate).date(date).endOf('day');
-        }
-    }
-
-    return {
-        startDate: startDate.toDate(),
-        endDate: endDate.toDate(),
-    };
-};
-
 const GetTransactionHistory = async (query) => {
     const { fishType, warehouseId, transactionType, month, date, year } = query;
 
@@ -144,7 +100,7 @@ const GetTransactionHistory = async (query) => {
     }
 
     if (month || date || year) {
-        const { startDate, endDate } = constructDateRange(year, month, date);
+        const { startDate, endDate } = ConstructDateRange(year, month, date);
         options.where.created_at = {
             gte: startDate,
             lte: endDate,
@@ -154,7 +110,7 @@ const GetTransactionHistory = async (query) => {
     const baseQuery = await DB.fishTransaction.findMany(options);
     const transformedData = baseQuery.map((data) => {
         return {
-           ...data,
+            ...data,
             created_at: moment(data.created_at).format('YYYY-MM-DD'),
             updated_at: moment(data.updated_at).format('YYYY-MM-DD'),
         };
@@ -163,11 +119,11 @@ const GetTransactionHistory = async (query) => {
 };
 
 const GenerateToPdf = async (data) => {
-    const html = fs.readFileSync('./assets/transaction-history.html', "utf-8");
+    const html = fs.readFileSync('./assets/transaction-history.html', 'utf-8');
     const options = {
         format: 'A4',
         orientation: 'portrait',
-        border: '10mm'
+        border: '10mm',
     };
 
     const document = {
@@ -175,7 +131,7 @@ const GenerateToPdf = async (data) => {
         data: {
             data: data,
         },
-        type: 'buffer'
+        type: 'buffer',
     };
 
     return await pdf.create(document, options);
@@ -186,5 +142,5 @@ module.exports = {
     DeductFishStock,
     ValidateFishStock,
     GetTransactionHistory,
-    GenerateToPdf
+    GenerateToPdf,
 };
