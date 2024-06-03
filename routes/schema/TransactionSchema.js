@@ -97,6 +97,13 @@ const TransactionHistory = checkSchema({
         },
         optional: true,
     },
+    download: {
+        in: ['query'],
+        isBoolean: {
+            errorMessage: 'download must be a boolean',
+        },
+        optional: true,
+    },
 });
 
 module.exports = {

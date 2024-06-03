@@ -58,7 +58,13 @@ const CreateTransaction = async (req, res) => {
 
 const GetTransactionHistory = async (req, res) => {
     try {
+        const { download } = req.query;
+        
         const transactionHistory = await TransactionService.GetTransactionHistory(req.query);
+        if (download) {
+            const generatePdf = await TransactionService.GenerateToPdf(transactionHistory);
+            return res.sendPdf(generatePdf, 'transaction-history.pdf');    
+        }
         return res.successWithData(transactionHistory);
     } catch (error) {
         Logger.error(

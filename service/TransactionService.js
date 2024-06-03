@@ -1,4 +1,7 @@
 const { toInteger } = require('lodash');
+const pdf = require('pdf-creator-node');
+const fs = require('fs');
+
 const { TransactionType } = require('../utils/constants');
 const DB = require('../utils/database');
 const moment = require('moment');
@@ -125,7 +128,7 @@ const GetTransactionHistory = async (query) => {
         where: {},
         orderBy: {
             created_at: 'desc',
-        }
+        },
     };
 
     if (fishType) {
@@ -149,7 +152,33 @@ const GetTransactionHistory = async (query) => {
     }
 
     const baseQuery = await DB.fishTransaction.findMany(options);
-    return baseQuery;
+    const transformedData = baseQuery.map((data) => {
+        return {
+           ...data,
+            created_at: moment(data.created_at).format('YYYY-MM-DD'),
+            updated_at: moment(data.updated_at).format('YYYY-MM-DD'),
+        };
+    });
+    return transformedData;
+};
+
+const GenerateToPdf = async (data) => {
+    const html = fs.readFileSync('./assets/transaction-history.html', "utf-8");
+    const options = {
+        format: 'A4',
+        orientation: 'portrait',
+        border: '10mm'
+    };
+
+    const document = {
+        html: html,
+        data: {
+            data: data,
+        },
+        type: 'buffer'
+    };
+
+    return await pdf.create(document, options);
 };
 
 module.exports = {
@@ -157,4 +186,5 @@ module.exports = {
     DeductFishStock,
     ValidateFishStock,
     GetTransactionHistory,
+    GenerateToPdf
 };
