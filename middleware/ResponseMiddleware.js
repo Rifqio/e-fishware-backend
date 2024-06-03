@@ -1,6 +1,6 @@
-const moment = require('moment');
+const { GenerateTransactionId } = require('../utils/helpers');
 const ResponseMiddleware = (req, res, next) => {
-    req.transactionId = `EFSH${moment().format('DDMMHHYYss')}`;
+    req.transactionId = GenerateTransactionId();
     
     res.success = (message = null) => {
         return res.status(200).json({

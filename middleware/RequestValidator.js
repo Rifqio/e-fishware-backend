@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const { GenerateTransactionId } = require('../utils/helpers');
 
 const ValidationHandler = (req, res, next) => {
     const errors = validationResult(req);
@@ -11,6 +12,7 @@ const ValidationHandler = (req, res, next) => {
                 path: error.path,
                 message: error.msg,
             })),
+            transactionId: GenerateTransactionId(),
         };
 
         return res.status(400).json(response);

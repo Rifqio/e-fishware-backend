@@ -49,7 +49,6 @@ const Logger = winston.createLogger({
             return `${timestamp} ${level}: ${message}`;
         })
     ),
-    defaultMeta: { service: 'user-service' },
     transports: [new winston.transports.Console()],
 });
 
