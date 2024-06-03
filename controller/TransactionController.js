@@ -1,10 +1,12 @@
-const TransactionService = require('../service/TransactionService');
 const { TransactionType } = require('../utils/constants');
 const { Logger } = require('../utils/logger');
+const TransactionService = require('../service/TransactionService');
+const NotificationService = require('../service/NotificationService');
 
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
     const { fish_stock_id, quantity, transaction_type } = req.body;
+    const { firebase_token } = req.header;
     const { user_id } = req.user;
     try {
         const payload = { fish_stock_id, quantity, user_id };
@@ -31,6 +33,10 @@ const CreateTransaction = async (req, res) => {
                 payload,
                 currentQuantity
             );
+            const fishType = updatedData.fish_type;
+            if (updatedStock >= validateStock.maxStock) {
+                NotificationService.SendNotification(firebase_token, fishType, 'max');
+            }
         }
 
         if (transaction_type === TransactionType.DEDUCT) {
@@ -45,6 +51,11 @@ const CreateTransaction = async (req, res) => {
                 payload,
                 currentQuantity
             );
+
+            const fishType = updatedData.fish_type;
+            if (updatedStock <= validateStock.minStock) {
+                NotificationService.SendNotification(firebase_token, fishType);
+            }
         }
 
         return res.successWithData(updatedData, 'Transaction success');

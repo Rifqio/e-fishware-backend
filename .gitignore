@@ -71,3 +71,4 @@ lerna-debug.log*
 *.sw?
 
 package-lock.json
+/config/firebase_env.json
