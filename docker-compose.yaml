@@ -8,3 +8,5 @@ services:
       - "4200:4000"
     env_file:
       - .env
+    volumes:
+      - ./config/firebase_env.json:/usr/src/app/config/firebase_env.json
