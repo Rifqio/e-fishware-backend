@@ -1,0 +1,10 @@
+version: '3'
+services:
+  app:
+    container_name: e-fishware
+    image: rifqio/e-fishware
+    build: .
+    ports:
+      - "4200:4000"
+    env_file:
+      - .env
