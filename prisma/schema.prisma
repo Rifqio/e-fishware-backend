@@ -54,10 +54,6 @@ model FishStock {
 
 model FishStockTransaction {
   id_fish_stock_transaction Int             @id @default(autoincrement())
-  // fish                      Fish            @relation(fields: [fish_id], references: [id_fish])
-  // fish_id                   String
-  // warehouse                 Warehouse       @relation(fields: [warehouse_id], references: [id_warehouse])
-  // warehouse_id              Int
   quantity                  Int
   transaction_type          TransactionType
   created_at                DateTime        @default(now())
