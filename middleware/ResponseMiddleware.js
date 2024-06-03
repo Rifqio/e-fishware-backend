@@ -1,12 +1,12 @@
-const { GenerateTransactionId } = require('../utils/helpers');
+const { Generatetransaction_id } = require('../utils/helpers');
 const ResponseMiddleware = (req, res, next) => {
-    req.transactionId = GenerateTransactionId();
+    req.transaction_id = Generatetransaction_id();
     
     res.success = (message = null) => {
         return res.status(200).json({
             status: true,
             message: message || 'Success',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -15,7 +15,7 @@ const ResponseMiddleware = (req, res, next) => {
             status: true,
             message: message || 'Success',
             data: data,
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -23,7 +23,7 @@ const ResponseMiddleware = (req, res, next) => {
         return res.status(201).json({
             status: true,
             message: message || 'Success',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -32,7 +32,7 @@ const ResponseMiddleware = (req, res, next) => {
             status: true,
             message: message || 'Success',
             data: data,
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -40,7 +40,7 @@ const ResponseMiddleware = (req, res, next) => {
         return res.status(400).json({
             status: false,
             message: message || 'Bad Request',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -48,7 +48,7 @@ const ResponseMiddleware = (req, res, next) => {
         return res.status(401).json({
             status: false,
             message: message || 'Unauthorized',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -56,7 +56,7 @@ const ResponseMiddleware = (req, res, next) => {
         return res.status(403).json({
             status: false,
             message: message || 'Forbidden',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 
@@ -64,7 +64,7 @@ const ResponseMiddleware = (req, res, next) => {
         return res.status(500).json({
             status: false,
             message: message || 'Internal Server Error',
-            transactionId: req.transactionId,
+            transaction_id: req.transaction_id,
         });
     };
 

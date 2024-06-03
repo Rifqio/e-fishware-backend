@@ -3,11 +3,11 @@ const { Logger } = require('../utils/logger');
 const RequestLogger = (req, res, next) => {
     const start = new Date();
     const { method, url } = req;
-    const transactionId = req.transactionId; 
+    const transaction_id = req.transaction_id; 
 
-    let requestStartLog = `${method} ${url} | transaction_id: ${transactionId}`;
+    let requestStartLog = `${method} ${url} | transaction_id: ${transaction_id}`;
     if (method === 'POST') {
-        requestStartLog += ` | Payload: ${JSON.stringify(req.body)}`;
+        requestStartLog += ` | payload: ${JSON.stringify(req.body)}`;
     }
 
     Logger.http(requestStartLog);
@@ -16,7 +16,7 @@ const RequestLogger = (req, res, next) => {
         const end = new Date();
         const duration = end - start;
         const { statusCode } = res;
-        const responseLog = `${method} ${url} - ${statusCode} - ${duration}ms | transaction_id: ${transactionId}`;
+        const responseLog = `${method} ${url} - ${statusCode} - ${duration}ms | transaction_id: ${transaction_id}`;
 
         Logger.http(responseLog);
     });
