@@ -71,20 +71,18 @@ model FishStockTransaction {
 }
 
 view FishTransaction {
-  id_fish_stock_transaction Int @unique
-  fish_id                   String
+  id_fish_stock_transaction Int             @unique
+  id_fish_stock             String
   fish_type                 String
-  warehouse_id              Int
   quantity                  Int
   transaction_type          TransactionType
+  warehouse_name            String
+  warehouse_id              Int
   created_at                DateTime
   updated_at                DateTime
   updated_by                String
-  updated_by_id             String
-  warehouse_name            String
-  fish_stock_id             String
 
-  @@map("fish_transaction_view")
+  @@map("fish_transaction")
 }
 
 enum TransactionType {

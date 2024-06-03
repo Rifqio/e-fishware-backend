@@ -56,6 +56,19 @@ const CreateTransaction = async (req, res) => {
     }
 };
 
+const GetTransactionHistory = async (req, res) => {
+    try {
+        const transactionHistory = await TransactionService.GetTransactionHistory(req.query);
+        return res.successWithData(transactionHistory);
+    } catch (error) {
+        Logger.error(
+            `[${Namespace}::GetTransactionHistory] | Error: ${error.message} | Stack: ${error.stack}`
+        );
+        return res.internalServerError();
+    }
+};
+
 module.exports = {
     CreateTransaction,
+    GetTransactionHistory
 };
