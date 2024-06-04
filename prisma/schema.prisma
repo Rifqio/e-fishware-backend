@@ -24,7 +24,6 @@ model Warehouse {
   id_warehouse Int         @id @default(autoincrement())
   name         String
   fishes       FishStock[]
-  // transactions FishStockTransaction[]
 
   @@map("warehouse")
 }
@@ -33,7 +32,6 @@ model Fish {
   id_fish   String      @id @unique
   type      String      @unique
   FishStock FishStock[]
-  // FishStockTransaction FishStockTransaction[]
 
   @@map("fish")
 }
