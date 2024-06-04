@@ -101,6 +101,87 @@ const GetTotalSales = async ({ startDate, endDate, fishType }) => {
     };
 };
 
+const GetMostDemandedFish = async () => {
+    const startOfMonth = moment().startOf('month').toDate();
+    const endOfMonth = moment().endOf('month').toDate();
+
+    const fishDemandRaw = await db.fishStockTransaction.groupBy({
+        by: ['fish_stock_id'],
+        where: {
+            transaction_type: TransactionType.DEDUCT,
+        },
+        _sum: {
+            quantity: true,
+        },
+    });
+
+    const fishDemand = {};
+
+    for (const record of fishDemandRaw) {
+        const fishStock = await db.fishStock.findUnique({
+            where: { id_fish_stock: record.fish_stock_id },
+            include: { fish: true },
+        });
+        const fishType = fishStock.fish.type;
+
+        if (!fishDemand[fishType]) {
+            fishDemand[fishType] = 0;
+        }
+
+        fishDemand[fishType] += record._sum.quantity;
+    }
+
+    let maxDemand = 0;
+    let mostDemandedFish = null;
+
+    for (const [fishType, quantity] of Object.entries(fishDemand)) {
+        if (quantity > maxDemand) {
+            maxDemand = quantity;
+            mostDemandedFish = fishType;
+        }
+    }
+
+    if (!mostDemandedFish) {
+        return {
+            mostDemandedFish: null,
+            totalQuantitySoldThisMonth: 0,
+            currentStock: 0,
+        };
+    }
+
+    const totalQuantitySoldThisMonth = await db.fishStockTransaction.aggregate({
+        where: {
+            transaction_type: TransactionType.DEDUCT,
+            created_at: {
+                gte: startOfMonth,
+                lte: endOfMonth,
+            },
+            FishStock: {
+                fish_type: mostDemandedFish,
+            },
+        },
+        _sum: {
+            quantity: true,
+        },
+    });
+
+    const currentStock = await db.fishStock.aggregate({
+        where: {
+            fish_type: mostDemandedFish,
+        },
+        _sum: {
+            quantity: true,
+        },
+    });
+
+    return {
+        mostDemandedFish,
+        totalQuantitySoldThisMonth: totalQuantitySoldThisMonth._sum.quantity || 0,
+        currentStock: currentStock._sum.quantity || 0,
+    };
+};
+
 module.exports = {
     GetTotalSales,
+    GetMostDemandedFish
 };

@@ -13,6 +13,17 @@ const GetTotalSales = async (req, res) => {
     }
 };
 
+const GetMostDemandedFish = async (req, res) => {
+    try {
+        const data = await ChartService.GetMostDemandedFish();
+        return res.successWithData(data);
+    } catch (error) {
+        Logger.error(`[${Namespace}::GetMostDemandedFish] | Error: ${error.message} | Stack: ${error.stack}`);
+        return res.internalServerError();
+    }
+}
+
 module.exports = {
     GetTotalSales,
+    GetMostDemandedFish
 };
