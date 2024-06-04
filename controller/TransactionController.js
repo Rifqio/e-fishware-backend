@@ -6,8 +6,9 @@ const NotificationService = require('../service/NotificationService');
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
     const { fish_stock_id, quantity, transaction_type } = req.body;
-    const { firebase_token } = req.header;
+    const firebase_token = req.header['X-Firebase-Token'];
     const { user_id } = req.user;
+    
     try {
         const payload = { fish_stock_id, quantity, user_id };
         const validateStock = await TransactionService.ValidateFishStock(

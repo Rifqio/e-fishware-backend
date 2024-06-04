@@ -38,7 +38,7 @@ model Fish {
 
 model FishStock {
   id_fish_stock String                 @id
-  fish          Fish                   @relation(fields: [fish_type], references: [type])
+  fish          Fish                   @relation(fields: [fish_type], references: [type], onDelete: Cascade)
   fish_type     String
   warehouse     Warehouse              @relation(fields: [warehouse_id], references: [id_warehouse])
   warehouse_id  Int

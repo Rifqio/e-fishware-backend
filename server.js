@@ -13,7 +13,7 @@ const port = process.env.APP_PORT || 3000;
 
 app.use(cors({
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
     origin: '*',
 }));
 
