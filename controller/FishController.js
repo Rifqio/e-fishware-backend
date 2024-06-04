@@ -1,3 +1,4 @@
+const { isEmpty } = require('lodash');
 const FishService = require('../service/FishService');
 const { Logger } = require('../utils/logger');
 
@@ -86,9 +87,27 @@ const AddFishType = async (req, res) => {
     }
 };
 
+const EditFishType = async (req, res) => {
+    const { fish_id, type } = req.body;
+    try {
+        const validateFishId = await FishService.GetFishById(fish_id);
+        if (isEmpty(validateFishId)) {
+            return res.badRequest('Fish type not found');
+        }
+        const fish = await FishService.EditFishType(fish_id, type);
+        return res.successWithData(fish, 'Fish type updated successfully');
+    } catch (error) {
+        Logger.error(
+            `[${Namespace}::EditFishType] | Error: ${error.message} | Stack: ${error.stack}`
+        );
+        return res.internalServerError();
+    }
+}
+
 module.exports = {
     GetFishStock,
     GetFishType,
+    EditFishType,
     AddFishStock,
     EditFishStock,
     AddFishType

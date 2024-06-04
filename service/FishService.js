@@ -37,6 +37,14 @@ const GetFishType = async () => {
     });
 };
 
+const GetFishById = async (fishId) => {
+    return await DB.fish.findFirst({
+        where: {
+            id_fish: fishId,
+        },
+    });
+}
+
 const AddFishStock = async (data) => {
     const { fish_type, warehouse_id, quantity, min_stock, max_stock } = data;
     const sanitizedFishType = fish_type.replace(/\s+/g, '-');
@@ -90,6 +98,19 @@ const AddFishType = async (type) => {
     return fish;
 };
 
+const EditFishType = async (fishId, type) => {
+    const fish = await DB.fish.update({
+        where: {
+            id_fish: fishId,
+        },
+        data: {
+            type,
+        },
+    });
+
+    return fish;
+}
+
 const ValidateFishStock = async (fishType, warehouseId) => {
     const fish = await DB.fishStock.findFirst({
         where: {
@@ -125,4 +146,6 @@ module.exports = {
     AddFishStock,
     EditFishStock,
     AddFishType,
+    EditFishType,
+    GetFishById
 };

@@ -94,9 +94,31 @@ const AddFishType = checkSchema({
     },
 });
 
+const EditFishType = checkSchema({
+    fish_id: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'fish_id must be a string',
+        },
+        notEmpty: {
+            errorMessage: 'fish_id cannot be empty',
+        },
+    },
+    type: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'type must be a string',
+        },
+        notEmpty: {
+            errorMessage: 'type cannot be empty',
+        },
+    }
+})
+
 
 module.exports = {
     GetFishSchema,
     AddFishStock,
     AddFishType,
+    EditFishType
 };
