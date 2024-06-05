@@ -5,15 +5,21 @@ const NotificationService = require('../service/NotificationService');
 
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
-    const { fish_stock_id, quantity, transaction_type } = req.body;
+    const { fish_type, warehouse_id, quantity, transaction_type } = req.body;
     const firebase_token = req.header['X-Firebase-Token'];
     const { user_id } = req.user;
-    
+
     try {
-        const payload = { fish_stock_id, quantity, user_id };
+        const payload = { fish_type, warehouse_id, quantity, user_id };
         const validateStock = await TransactionService.ValidateFishStock(
-            fish_stock_id
+            fish_type,
+            warehouse_id
         );
+
+        if (!validateStock) {
+            return res.successWithData([], 'Fish stock not found');
+        }
+
         const currentQuantity = validateStock.quantity;
 
         Logger.info(
@@ -34,9 +40,15 @@ const CreateTransaction = async (req, res) => {
                 payload,
                 currentQuantity
             );
+
             const fishType = updatedData.fish_type;
+
             if (updatedStock >= validateStock.maxStock) {
-                NotificationService.SendNotification(firebase_token, fishType, 'max');
+                NotificationService.SendNotification(
+                    firebase_token,
+                    fishType,
+                    'max'
+                );
             }
         }
 
@@ -71,12 +83,15 @@ const CreateTransaction = async (req, res) => {
 const GetTransactionHistory = async (req, res) => {
     try {
         const { download } = req.query;
-        
+
         const transactionHistory = await TransactionService.GetTransactionHistory(req.query);
         if (download) {
-            const generatePdf = await TransactionService.GenerateToPdf(transactionHistory);
-            return res.sendPdf(generatePdf, 'transaction-history.pdf');    
+            const generatePdf = await TransactionService.GenerateToPdf(
+                transactionHistory
+            );
+            return res.sendPdf(generatePdf, 'transaction-history.pdf');
         }
+        
         return res.successWithData(transactionHistory);
     } catch (error) {
         Logger.error(
@@ -88,5 +103,5 @@ const GetTransactionHistory = async (req, res) => {
 
 module.exports = {
     CreateTransaction,
-    GetTransactionHistory
+    GetTransactionHistory,
 };

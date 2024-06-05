@@ -13,13 +13,22 @@ const CreateFishTransaction = checkSchema({
             errorMessage: 'X-Firebase-Token cannot be empty',
         },
     },
-    fish_stock_id: {
+    fish_type: {
         in: ['body'],
         isString: {
-            errorMessage: 'fish_stock_id must be a string',
+            errorMessage: 'fish_type must be a string',
         },
         notEmpty: {
-            errorMessage: 'fish_stock_id cannot be empty',
+            errorMessage: 'fish_type cannot be empty',
+        },
+    },
+    warehouse_id: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'warehouse_id must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'warehouse_id cannot be empty',
         },
     },
     quantity: {

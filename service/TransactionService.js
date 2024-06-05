@@ -7,12 +7,17 @@ const DB = require('../utils/database');
 const { ConstructDateRange } = require('../utils/helpers');
 const moment = require('moment');
 
-const ValidateFishStock = async (fishStockId) => {
+const ValidateFishStock = async (fishType, warehouseId) => {
     const fishStock = await DB.fishStock.findFirst({
         where: {
-            id_fish_stock: fishStockId,
+            fish_type: fishType,
+            warehouse_id: warehouseId,
         },
     });
+
+    if (!fishStock) {
+        return [];
+    }
 
     const data = {
         minStock: fishStock.min_stock,
