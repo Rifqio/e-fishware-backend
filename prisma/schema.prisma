@@ -16,6 +16,7 @@ model User {
   password     String
   created_at   DateTime               @default(now())
   transactions FishStockTransaction[]
+  promotions   Promotion[]            @relation("UserPromotions")
 
   @@map("users")
 }
@@ -32,6 +33,7 @@ model Fish {
   id_fish   String      @id @unique
   type      String      @unique
   FishStock FishStock[]
+  Promotion Promotion[]
 
   @@map("fish")
 }
@@ -62,6 +64,20 @@ model FishStockTransaction {
   fish_stock_id             String?
 
   @@map("fish_stock_transaction")
+}
+
+model Promotion {
+  id_promotion  String   @id @default(uuid())
+  fish          Fish     @relation(fields: [fish_id], references: [id_fish])
+  fish_id       String
+  is_active     Boolean
+  start_date    DateTime
+  end_date      DateTime
+  created_at    DateTime @default(now())
+  created_by_id User     @relation("UserPromotions", fields: [created_by], references: [id_user])
+  created_by    String
+
+  @@map("promotion")
 }
 
 view FishTransaction {

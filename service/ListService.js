@@ -6,7 +6,12 @@ const GetList = async (type) => {
     }
 
     if (type === 'warehouse') {
-        return await db.warehouse.findMany({});
+        return await db.fishStock.groupBy({
+            by: ['warehouse_id'],
+            _sum: {
+                quantity: true
+            },
+        });
     }
 };
 
