@@ -5,7 +5,8 @@ const Namespace = 'PromotionController';
 const GetPromotion = async (req, res) => {
     const { isActive } = req.query;
     try {
-        const data = await PromotionService.GetPromotion(isActive);
+        const isActiveBool = isActive === 'true';
+        const data = await PromotionService.GetPromotion(isActiveBool);
         return res.successWithData(data, 'Promotion data retrieved successfully');
     } catch (error) {
         Logger.error(`[${Namespace}::GetPromotion] | error: ${error} | stack ${error.stack}`);

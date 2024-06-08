@@ -3,9 +3,7 @@ const db = require('../utils/database');
 
 const GetPromotion = async (isActive) => {
     const data = await db.promotion.findMany({
-        where: {
-            is_active: isActive || true,
-        },
+        where: { is_active: isActive },
         select: {
             fish: {
                 select: {
