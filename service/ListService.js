@@ -6,12 +6,21 @@ const GetList = async (type) => {
     }
 
     if (type === 'warehouse') {
-        return await db.fishStock.groupBy({
+        const data = await db.fishStock.groupBy({
             by: ['warehouse_id'],
             _sum: {
                 quantity: true
             },
         });
+
+        const transformedData = data.map((item) => {
+            return {
+                warehouse_id: item.warehouse_id,
+                total_quantity: item._sum.quantity
+            }
+        });
+        
+        return transformedData
     }
 };
 
