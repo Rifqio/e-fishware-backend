@@ -28,7 +28,7 @@ const CreateTransaction = async (req, res) => {
 
         let updatedStock = 0;
         let updatedData;
-        payload = { ...payload, fish_stock_id: validateStock.id_fish_stock };
+        payload = { ...payload, fish_stock_id: validateStock.fishStockId };
         if (transaction_type === TransactionType.ADD) {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;

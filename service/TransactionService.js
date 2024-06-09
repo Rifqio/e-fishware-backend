@@ -20,6 +20,7 @@ const ValidateFishStock = async (fishType, warehouseId) => {
     }
 
     const data = {
+        fishStockId: fishStock.id_fish_stock,
         minStock: fishStock.min_stock,
         maxStock: fishStock.max_stock,
         quantity: fishStock.quantity,
