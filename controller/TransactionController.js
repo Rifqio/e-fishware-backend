@@ -10,7 +10,7 @@ const CreateTransaction = async (req, res) => {
     const { user_id } = req.user;
 
     try {
-        const payload = { fish_type, warehouse_id, quantity, user_id };
+        let payload = { fish_type, warehouse_id, quantity, user_id };
         const validateStock = await TransactionService.ValidateFishStock(
             fish_type,
             warehouse_id
@@ -28,6 +28,7 @@ const CreateTransaction = async (req, res) => {
 
         let updatedStock = 0;
         let updatedData;
+        payload = { ...payload, fish_stock_id: validateStock.id_fish_stock };
         if (transaction_type === TransactionType.ADD) {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;
@@ -41,15 +42,15 @@ const CreateTransaction = async (req, res) => {
                 currentQuantity
             );
 
-            const fishType = updatedData.fish_type;
+            // const fishType = updatedData.fish_type;
 
-            if (updatedStock >= validateStock.maxStock) {
-                NotificationService.SendNotification(
-                    firebase_token,
-                    fishType,
-                    'max'
-                );
-            }
+            // if (updatedStock >= validateStock.maxStock) {
+            //     NotificationService.SendNotification(
+            //         firebase_token,
+            //         fishType,
+            //         'max'
+            //     );
+            // }
         }
 
         if (transaction_type === TransactionType.DEDUCT) {
@@ -65,10 +66,10 @@ const CreateTransaction = async (req, res) => {
                 currentQuantity
             );
 
-            const fishType = updatedData.fish_type;
-            if (updatedStock <= validateStock.minStock) {
-                NotificationService.SendNotification(firebase_token, fishType);
-            }
+            // const fishType = updatedData.fish_type;
+            // if (updatedStock <= validateStock.minStock) {
+            //     NotificationService.SendNotification(firebase_token, fishType);
+            // }
         }
 
         return res.successWithData(updatedData, 'Transaction success');

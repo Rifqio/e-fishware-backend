@@ -9,9 +9,7 @@ const CreateFishTransaction = checkSchema({
         isString: {
             errorMessage: 'X-Firebase-Token must be a string',
         },
-        notEmpty: {
-            errorMessage: 'X-Firebase-Token cannot be empty',
-        },
+        optional: true
     },
     fish_type: {
         in: ['body'],
