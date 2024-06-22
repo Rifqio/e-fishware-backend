@@ -1,23 +1,19 @@
 FROM node:20.10.0-alpine
-
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY package*.json ./
 
-ENV PHANTOMJS_VERSION=2.1.1
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-ENV PATH=$PATH:/home/node/.npm-global/bin
+# Add support for https on wget
+RUN apk update && apk add --no-cache wget && apk --no-cache add openssl wget && apk add ca-certificates && update-ca-certificates
 
-RUN apk update && apk add --no-cache fontconfig curl curl-dev && \
-    cd /tmp && curl -Ls https://github.com/dustinblackman/phantomized/releases/download/${PHANTOMJS_VERSION}/dockerized-phantomjs.tar.gz | tar xz && \
-    cp -R lib lib64 / && \
-    cp -R usr/lib/x86_64-linux-gnu /usr/lib && \
-    cp -R usr/share /usr/share && \
-    cp -R etc/fonts /etc && \
-    curl -k -Ls https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -jxf - && \
-    cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
+# Add phantomjs
+RUN wget -qO- "https://github.com/fgrehm/docker-phantomjs2/releases/download/v2.0.0-20150722/dockerized-phantomjs.tar.gz" | tar xz -C / \
+    && npm install -g phantomjs-prebuilt --force
 
-RUN npm install -g html-pdf
+# Add fonts required by phantomjs to render html correctly
+RUN apk add --update ttf-dejavu ttf-droid ttf-freefont ttf-liberation && rm -rf /var/cache/apk/*
+
+# see this: https://github.com/marcbachmann/node-html-pdf/issues/563#issuecomment-712852134
+RUN echo "" > /tmp/openssl.cnf
 
 RUN npm install
 
