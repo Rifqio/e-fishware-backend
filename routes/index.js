@@ -15,9 +15,9 @@ route.get('/', (req, res) => {
 
 route.use('/auth', AuthRoutes);
 
+route.use('/transaction', TransactionRoutes);
 route.use(AuthVerify);
 route.use('/fish', FishRoutes);
-route.use('/transaction', TransactionRoutes);
 route.use('/chart', ChartRoutes);
 route.use('/seed', SeedRoutes);
 route.use('/list', ListRoutes);
