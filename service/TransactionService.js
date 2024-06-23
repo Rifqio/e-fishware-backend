@@ -129,7 +129,7 @@ const GenerateToPdf = async (data) => {
     const options = {
         format: 'A4',
         orientation: 'portrait',
-        border: '10mm',
+        border: '1mm',
     };
 
     const document = {
