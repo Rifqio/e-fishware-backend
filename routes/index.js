@@ -8,6 +8,7 @@ const ChartRoutes = require('./ChartRoute');
 const TransactionRoutes = require('./TransactionRoute');
 const ListRoutes = require('./ListRoute');
 const PromotionRoutes = require('./PromotionRoute');
+const NotificationRoute = require('./NotificationRoute');
 
 route.get('/', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'Welcome to E-Fishware API' });
@@ -16,6 +17,7 @@ route.get('/', (req, res) => {
 route.use('/auth', AuthRoutes);
 
 route.use('/transaction', TransactionRoutes);
+route.use('/notification', NotificationRoute);
 route.use(AuthVerify);
 route.use('/fish', FishRoutes);
 route.use('/chart', ChartRoutes);

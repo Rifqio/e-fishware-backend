@@ -42,15 +42,15 @@ const CreateTransaction = async (req, res) => {
                 currentQuantity
             );
 
-            // const fishType = updatedData.fish_type;
+            const fishType = updatedData.fish_type;
 
-            // if (updatedStock >= validateStock.maxStock) {
-            //     NotificationService.SendNotification(
-            //         firebase_token,
-            //         fishType,
-            //         'max'
-            //     );
-            // }
+            if (updatedStock >= validateStock.maxStock) {
+                NotificationService.SendNotification(
+                    firebase_token,
+                    fishType,
+                    'max'
+                );
+            }
         }
 
         if (transaction_type === TransactionType.DEDUCT) {
@@ -66,10 +66,10 @@ const CreateTransaction = async (req, res) => {
                 currentQuantity
             );
 
-            // const fishType = updatedData.fish_type;
-            // if (updatedStock <= validateStock.minStock) {
-            //     NotificationService.SendNotification(firebase_token, fishType);
-            // }
+            const fishType = updatedData.fish_type;
+            if (updatedStock <= validateStock.minStock) {
+                NotificationService.SendNotification(firebase_token, fishType);
+            }
         }
 
         return res.successWithData(updatedData, 'Transaction success');
