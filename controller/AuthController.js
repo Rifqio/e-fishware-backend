@@ -49,6 +49,8 @@ const Register = async (req, res) => {
 
 const Login = async (req, res) => {
     const { email, password } = req.body;
+    const firebaseToken = req.headers['x-firebase-token'];
+
     try {
         const user = await AuthService.FindExistingUser(email);
 
@@ -66,6 +68,8 @@ const Login = async (req, res) => {
             user_id: user.id_user,
             email: user.email,
         });
+
+        await AuthService.InsertFirebaseToken(email, firebaseToken);
 
         return res.successWithData(
             {

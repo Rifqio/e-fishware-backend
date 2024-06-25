@@ -4,13 +4,6 @@ const { TransactionType } = require('../../utils/constants');
 const currentYear = new Date().getFullYear();
 
 const CreateFishTransaction = checkSchema({
-    'X-Firebase-Token': {
-        in: ['header'],
-        isString: {
-            errorMessage: 'X-Firebase-Token must be a string',
-        },
-        optional: true
-    },
     fish_type: {
         in: ['body'],
         isString: {

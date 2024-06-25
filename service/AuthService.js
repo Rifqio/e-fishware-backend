@@ -13,7 +13,7 @@ const FindExistingUser = async (email) => {
 
 const CheckRepeatPassword = async (password, repeatPassword) => {
     return password === repeatPassword;
-}
+};
 
 const RegisterUser = async (data) => {
     const { email, password, full_name, employee_id } = data;
@@ -26,13 +26,24 @@ const RegisterUser = async (data) => {
             full_name: full_name,
         },
     });
-}
+};
 
 const GenerateAuthToken = (payload) => {
     return jwt.sign(payload, JWT_SECRET, {
         expiresIn: '30d',
         issuer: 'e-fishware-server',
         audience: 'e-fishware-client',
+    });
+};
+
+const InsertFirebaseToken = async (email, token) => {
+    return await DB.user.update({
+        where: {
+            email,
+        },
+        data: {
+            fcm_token: token,
+        },
     });
 };
 
@@ -49,5 +60,6 @@ module.exports = {
     GenerateAuthToken,
     VerifyAuthToken,
     FindExistingUser,
-    CheckRepeatPassword
+    CheckRepeatPassword,
+    InsertFirebaseToken,
 };

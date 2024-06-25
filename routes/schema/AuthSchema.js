@@ -1,6 +1,12 @@
 const { checkSchema } = require('express-validator');
 
 const LoginSchema = checkSchema({
+    'X-Firebase-Token': {
+        in: ['headers'],
+        notEmpty: {
+            errorMessage: 'X-Firebase-Token cannot be empty',
+        },
+    },
     email: {
         in: ['body'],
         notEmpty: {

@@ -14,6 +14,7 @@ model User {
   employee_id  String                 @unique
   full_name    String
   password     String
+  fcm_token    String?                @unique
   created_at   DateTime               @default(now())
   transactions FishStockTransaction[]
   promotions   Promotion[]            @relation("UserPromotions")

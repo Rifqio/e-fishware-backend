@@ -6,7 +6,6 @@ const NotificationService = require('../service/NotificationService');
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
     const { fish_type, warehouse_id, quantity, transaction_type } = req.body;
-    const firebase_token = req.header['X-Firebase-Token'];
     const { user_id } = req.user;
 
     try {
@@ -29,6 +28,11 @@ const CreateTransaction = async (req, res) => {
         let updatedStock = 0;
         let updatedData;
         payload = { ...payload, fish_stock_id: validateStock.fishStockId };
+        
+        const firebaseToken = await TransactionService.GetFirebaseToken(
+            user_id
+        );
+
         if (transaction_type === TransactionType.ADD) {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;
@@ -46,7 +50,7 @@ const CreateTransaction = async (req, res) => {
 
             if (updatedStock >= validateStock.maxStock) {
                 NotificationService.SendNotification(
-                    firebase_token,
+                    firebaseToken,
                     fishType,
                     'max'
                 );
@@ -68,7 +72,7 @@ const CreateTransaction = async (req, res) => {
 
             const fishType = updatedData.fish_type;
             if (updatedStock <= validateStock.minStock) {
-                NotificationService.SendNotification(firebase_token, fishType);
+                NotificationService.SendNotification(firebaseToken, fishType);
             }
         }
 
@@ -92,7 +96,7 @@ const GetTransactionHistory = async (req, res) => {
             );
             return res.sendPdf(generatePdf, 'transaction-history.pdf');
         }
-        
+
         return res.successWithData(transactionHistory);
     } catch (error) {
         Logger.error(

@@ -124,6 +124,17 @@ const GetTransactionHistory = async (query) => {
     return transformedData;
 };
 
+const GetFirebaseToken = async (userId) => {
+    return await DB.user.findFirst({
+        where: {
+            id_user: userId,
+        },
+        select: {
+            fcm_token: true,
+        },
+    });
+};
+
 const GenerateToPdf = async (data) => {
     const html = fs.readFileSync('./assets/transaction-history.html', 'utf-8');
     const options = {
@@ -149,4 +160,5 @@ module.exports = {
     ValidateFishStock,
     GetTransactionHistory,
     GenerateToPdf,
+    GetFirebaseToken
 };
