@@ -33,6 +33,8 @@ const CreateTransaction = async (req, res) => {
             user_id
         );
 
+        Logger.debug(`[${Namespace}::CreateTransaction] | Firebase token: ${firebaseToken.fcm_token}`);
+
         if (transaction_type === TransactionType.ADD) {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;
@@ -50,7 +52,7 @@ const CreateTransaction = async (req, res) => {
 
             if (updatedStock >= validateStock.maxStock) {
                 NotificationService.SendNotification(
-                    firebaseToken,
+                    firebaseToken.fcm_token,
                     fishType,
                     'max'
                 );
@@ -72,7 +74,7 @@ const CreateTransaction = async (req, res) => {
 
             const fishType = updatedData.fish_type;
             if (updatedStock <= validateStock.minStock) {
-                NotificationService.SendNotification(firebaseToken, fishType);
+                NotificationService.SendNotification(firebaseToken.fcm_token, fishType);
             }
         }
 
