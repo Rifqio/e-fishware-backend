@@ -8,6 +8,7 @@ const Namespace = 'AuthController';
 
 const Register = async (req, res) => {
     const { email, password, repeat_password } = req.body;
+    const firebaseToken = req.headers['x-firebase-token'];
     try {
         const findExistingUser = await AuthService.FindExistingUser(email);
         if (!isEmpty(findExistingUser)) {
@@ -22,7 +23,7 @@ const Register = async (req, res) => {
             return res.badRequest('Password does not match');
         }
 
-        const user = await AuthService.RegisterUser(req.body);
+        const user = await AuthService.RegisterUser(req.body, firebaseToken);
         const token = AuthService.GenerateAuthToken({
             name: user.full_name,
             user_id: user.id_user,

@@ -15,7 +15,7 @@ const CheckRepeatPassword = async (password, repeatPassword) => {
     return password === repeatPassword;
 };
 
-const RegisterUser = async (data) => {
+const RegisterUser = async (data, firebaseToken) => {
     const { email, password, full_name, employee_id } = data;
     const hashedPassword = await bcrypt.hash(password, 10);
     return await DB.user.create({
@@ -24,6 +24,7 @@ const RegisterUser = async (data) => {
             employee_id: employee_id,
             password: hashedPassword,
             full_name: full_name,
+            fcm_token: firebaseToken
         },
     });
 };
