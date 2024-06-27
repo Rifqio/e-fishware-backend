@@ -8,6 +8,7 @@ const Namespace = 'SchedulerService';
 const GetPromotionDue = async () => {
     try {
         Logger.info(`[${Namespace}::GetPromotionDue] | Start`);
+        const currentDate = moment().format('YYYY-MM-DD');
         const data = await db.promotion.findMany({
             select: {
                 base_price: true,
@@ -22,6 +23,12 @@ const GetPromotionDue = async () => {
                         type: true,
                     },
                 },
+            },
+            where: {
+                end_date: {
+                    lte: currentDate,
+                },
+                is_active: true,
             },
         });
         Logger.info(
@@ -66,16 +73,17 @@ const RevertOriginalPriceJob = async () => {
         try {
             Logger.info(`[${Namespace}::RevertOriginalPriceJob] | Start`);
             const data = await GetPromotionDue();
-            Logger.info(`[${Namespace}::RevertOriginalPriceJob] | Data retrieved successfully`);
+            Logger.info(
+                `[${Namespace}::RevertOriginalPriceJob] | Data retrieved successfully`
+            );
             if (data.length > 0) {
                 for (const item of data) {
-                    const isSameDay = moment(item.end_date).isSame(moment(),'day');
-                    if (item.is_active && isSameDay) {
-                        const { id_fish } = item.fish;
-                        const { base_price } = item;
-                        await RevertOriginalPrice(id_fish, base_price);
-                        Logger.info(`[${Namespace}::RevertOriginalPriceJob] | Reverted original price for fish id: ${id_fish}`)
-                    }
+                    const { base_price } = item;
+                    const { id_fish } = item.fish;
+                    await RevertOriginalPrice(id_fish, base_price);
+                    Logger.info(
+                        `[${Namespace}::RevertOriginalPriceJob] | Reverted original price for fish id: ${id_fish}`
+                    );
                 }
             }
         } catch (error) {
