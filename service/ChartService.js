@@ -53,12 +53,23 @@ const GetTotalSales = async ({ startDate, endDate, fishType }) => {
                     warehouse: true,
                 },
             });
-
+            
+            const fishPrice = await db.fish.findFirst({
+                where: {
+                    type: fishStock.fish_type
+                },
+                select: {
+                    price: true
+                }
+            });
+          
+            const totalRevenue = fishPrice.price * sale._sum.quantity;
             return {
                 fish_type: fishStock.fish.type,
                 warehouse_id: fishStock.warehouse_id,
                 transaction_type: sale.transaction_type,
                 total_quantity_sold: sale._sum.quantity,
+                total_revenue: totalRevenue,
             };
         })
     );

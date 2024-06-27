@@ -23,6 +23,20 @@ const AddPromotion = checkSchema({
             },
         },
     },
+    discount: {
+        in: ['body'],
+        isNumeric: {
+            errorMessage: 'discount must be a number',
+        },
+        custom: {
+            options: (value) => {
+                if (value < 0 || value > 100) {
+                    throw new Error('discount must be between 0 and 100');
+                }
+                return true;
+            }
+        }
+    },
     startDate: {
         in: ['body'],
         isISO8601: {

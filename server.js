@@ -7,6 +7,7 @@ const HttpLogger = require('./middleware/HttpLoggerMiddleware');
 const ResponseMiddleware = require('./middleware/ResponseMiddleware');
 const DB = require('./utils/database');
 const routes = require('./routes');
+const { SchedulerGroup } = require('./service/SchedulerService');
 
 const app = express();
 const port = process.env.APP_PORT || 3000;
@@ -25,6 +26,8 @@ app.use('/api', routes);
 app.listen(port, async () => {
     await DB.$connect();
     Logger.info('Server is running on port ' + port);
+
+    await SchedulerGroup();
 });
 
 process.on('unhandledRejection', (error) => {

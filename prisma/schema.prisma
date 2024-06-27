@@ -75,6 +75,8 @@ model Promotion {
   fish          Fish     @relation(fields: [fish_id], references: [id_fish])
   fish_id       String
   is_active     Boolean
+  base_price    Int      @default(0)
+  discount      Int      @default(0)
   start_date    DateTime
   end_date      DateTime
   created_at    DateTime @default(now())
@@ -89,6 +91,7 @@ view FishTransaction {
   id_fish_stock             String
   fish_type                 String
   quantity                  Int
+  price                     Int
   transaction_type          TransactionType
   warehouse_name            String
   warehouse_id              Int

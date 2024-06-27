@@ -16,8 +16,14 @@ const GetPromotion = async (req, res) => {
 
 const AddPromotion = async (req, res) => {
     const { user_id } = req.user;
+    const { fishId, discount } = req.body;
     try {
         const data = await PromotionService.AddPromotion(req.body, user_id);
+        Logger.info(`[${Namespace}::AddPromotion] | data: ${JSON.stringify(data)}`);
+
+        const updateCurrentPrice = await PromotionService.UpdateCurrentPrice(fishId, discount);
+        Logger.info(`[${Namespace}::AddPromotion] | updateCurrentPrice: ${JSON.stringify(updateCurrentPrice)}`);
+        
         return res.createdWithData(data, 'Promotion added successfully');
     } catch (error) {
         Logger.error(`[${Namespace}::AddPromotion] | error: ${error} | stack ${error.stack}`);
