@@ -37,24 +37,47 @@ const GetFishType = async () => {
     });
 };
 
+const GetFishPrice = async (fishType = null, fishId = null) => {
+    let whereCondition = {};
+    
+    if (fishType) {
+        whereCondition = {
+            type: fishType,
+        };
+    } else {
+        whereCondition = {
+            id_fish: fishId,
+        };
+    }
+
+    return await DB.fish.findFirst({
+        where: whereCondition,
+        select: {
+            price: true,
+        },
+    });
+};
+
 const GetFishById = async (fishId) => {
     return await DB.fish.findFirst({
         where: {
             id_fish: fishId,
         },
     });
-}
+};
 
 const AddFishStock = async (data) => {
-    const { fish_type, warehouse_id, quantity, min_stock, max_stock } = data;
+    const { fish_type, warehouse_id, quantity, min_stock, max_stock, fishPrice } = data;
     const sanitizedFishType = fish_type.replace(/\s+/g, '-');
     const id_fish_stock = `${sanitizedFishType}-${warehouse_id}`;
-    
+    const totalPrice = fishPrice * quantity;
+
     const fishStock = await DB.fishStock.create({
         data: {
             fish_type: fish_type,
             warehouse_id,
             quantity,
+            total_price: totalPrice,
             min_stock,
             max_stock,
             id_fish_stock: id_fish_stock.toLowerCase(),
@@ -88,28 +111,30 @@ const ValidateFishTypeWarehouse = async (fishType, warehouseId) => {
     return { fish, warehouse };
 };
 
-const AddFishType = async (type) => {
+const AddFishType = async (type, price) => {
     const fish = await DB.fish.create({
         data: {
             type,
+            price,
         },
     });
 
     return fish;
 };
 
-const EditFishType = async (fishId, type) => {
+const EditFishType = async (fishId, type, price) => {
     const fish = await DB.fish.update({
         where: {
             id_fish: fishId,
         },
         data: {
             type,
+            price,
         },
     });
 
     return fish;
-}
+};
 
 const ValidateFishStock = async (fishType, warehouseId) => {
     const fish = await DB.fishStock.findFirst({
@@ -147,5 +172,6 @@ module.exports = {
     EditFishStock,
     AddFishType,
     EditFishType,
-    GetFishById
+    GetFishById,
+    GetFishPrice
 };

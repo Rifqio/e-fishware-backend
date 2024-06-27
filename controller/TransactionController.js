@@ -20,6 +20,10 @@ const CreateTransaction = async (req, res) => {
         }
 
         const currentQuantity = validateStock.quantity;
+        const currentTotalPrice = validateStock.totalPrice;
+
+        const getFishPrice = await TransactionService.GetFishPrice(fish_type);
+        const fishPrice = getFishPrice.price;
 
         Logger.info(
             `[${Namespace}::CreateTransaction] | fishType: ${fish_type}, warehouseId: ${warehouse_id} currentQuantity: ${currentQuantity}, maxStock: ${validateStock.maxStock}, minStock: ${validateStock.minStock}`
@@ -27,7 +31,15 @@ const CreateTransaction = async (req, res) => {
 
         let updatedStock = 0;
         let updatedData;
-        payload = { ...payload, fish_stock_id: validateStock.fishStockId };
+
+        const totalPrice = quantity * fishPrice;
+
+        payload = {
+            ...payload,
+            fish_stock_id: validateStock.fishStockId,
+            totalPrice,
+            currentTotalPrice,
+        };
 
         const firebaseToken = await TransactionService.GetFirebaseToken(
             user_id

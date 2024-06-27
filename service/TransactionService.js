@@ -24,20 +24,35 @@ const ValidateFishStock = async (fishType, warehouseId) => {
         minStock: fishStock.min_stock,
         maxStock: fishStock.max_stock,
         quantity: fishStock.quantity,
+        totalPrice: fishStock.total_price
     };
 
     return data;
 };
 
+const GetFishPrice = async (fishType) => {
+    return await DB.fish.findFirst({
+        where: {
+            type: fishType,
+        },
+        select: {
+            price: true,
+        }
+    });
+};
+
 const AddFishStock = async (payload, currentQuantity) => {
-    const { fish_stock_id, quantity, user_id } = payload;
-    const transcation = await DB.$transaction(async (tx) => {
+    const { fish_stock_id, quantity, user_id, totalPrice, currentTotalPrice } = payload;
+    const updatedPrice = currentTotalPrice + totalPrice;
+
+    const transaction = await DB.$transaction(async (tx) => {
         await tx.fishStockTransaction.create({
             data: {
                 quantity: quantity,
                 transaction_type: TransactionType.ADD,
                 fish_stock_id: fish_stock_id,
                 updated_by: user_id,
+                price: totalPrice,
             },
         });
 
@@ -48,23 +63,27 @@ const AddFishStock = async (payload, currentQuantity) => {
             },
             data: {
                 quantity: newQuantity,
+                total_price: updatedPrice,
             },
         });
 
         return updatedFishStock;
     });
-    return transcation;
+    return transaction;
 };
 
 const DeductFishStock = async (payload, currentQuantity) => {
-    const { fish_stock_id, quantity, user_id } = payload;
-    const transcation = await DB.$transaction(async (tx) => {
+    const { fish_stock_id, quantity, user_id, totalPrice, currentTotalPrice } = payload;
+    const updatedPrice = currentTotalPrice - totalPrice;
+ 
+    const transaction = await DB.$transaction(async (tx) => {
         await tx.fishStockTransaction.create({
             data: {
                 quantity: quantity,
                 transaction_type: TransactionType.DEDUCT,
                 fish_stock_id: fish_stock_id,
                 updated_by: user_id,
+                price: totalPrice,
             },
         });
 
@@ -75,12 +94,13 @@ const DeductFishStock = async (payload, currentQuantity) => {
             },
             data: {
                 quantity: newQuantity,
+                total_price: updatedPrice,
             },
         });
 
         return updatedFishStock;
     });
-    return transcation;
+    return transaction;
 };
 
 const GetTransactionHistory = async (query) => {
@@ -160,5 +180,6 @@ module.exports = {
     ValidateFishStock,
     GetTransactionHistory,
     GenerateToPdf,
-    GetFirebaseToken
+    GetFirebaseToken,
+    GetFishPrice,
 };

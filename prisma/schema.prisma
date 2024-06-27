@@ -14,7 +14,7 @@ model User {
   employee_id  String                 @unique
   full_name    String
   password     String
-  fcm_token    String?                
+  fcm_token    String?
   created_at   DateTime               @default(now())
   transactions FishStockTransaction[]
   promotions   Promotion[]            @relation("UserPromotions")
@@ -33,6 +33,7 @@ model Warehouse {
 model Fish {
   id_fish   String      @id @unique
   type      String      @unique
+  price     Int         @default(0)
   FishStock FishStock[]
   Promotion Promotion[]
 
@@ -46,6 +47,7 @@ model FishStock {
   warehouse     Warehouse              @relation(fields: [warehouse_id], references: [id_warehouse])
   warehouse_id  Int
   quantity      Int
+  total_price   Int                    @default(0)
   min_stock     Int
   max_stock     Int
   transactions  FishStockTransaction[]
@@ -57,6 +59,7 @@ model FishStockTransaction {
   id_fish_stock_transaction Int             @id @default(autoincrement())
   quantity                  Int
   transaction_type          TransactionType
+  price                     Int             @default(0)
   created_at                DateTime        @default(now())
   updated_at                DateTime        @default(now())
   updated_by                String

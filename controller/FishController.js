@@ -38,6 +38,14 @@ const AddFishStock = async (req, res) => {
             return res.badRequest('Fish stock already exists');
         }
 
+        const getBasePrice = await FishService.GetFishPrice(fish_type);
+        const fishPrice = getBasePrice.price;
+
+        req.body = {
+            ...req.body,
+            fishPrice
+        };
+
         const data = await FishService.AddFishStock(req.body);
         return res.createdWithData(data, 'Fish stock added successfully');
     } catch (error) {
@@ -75,9 +83,9 @@ const EditFishStock = async (req, res) => {
 };
 
 const AddFishType = async (req, res) => {
-    const { type } = req.body
+    const { type, price } = req.body
     try {
-        const fish = await FishService.AddFishType(type);
+        const fish = await FishService.AddFishType(type, price);
         return res.createdWithData(fish, 'Fish type added successfully');
     } catch (error) {
         Logger.error(
@@ -88,13 +96,13 @@ const AddFishType = async (req, res) => {
 };
 
 const EditFishType = async (req, res) => {
-    const { fish_id, type } = req.body;
+    const { fish_id, type, price } = req.body;
     try {
         const validateFishId = await FishService.GetFishById(fish_id);
         if (isEmpty(validateFishId)) {
             return res.badRequest('Fish type not found');
         }
-        const fish = await FishService.EditFishType(fish_id, type);
+        const fish = await FishService.EditFishType(fish_id, type, price);
         return res.successWithData(fish, 'Fish type updated successfully');
     } catch (error) {
         Logger.error(

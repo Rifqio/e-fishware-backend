@@ -59,10 +59,10 @@ const AddFishStock = checkSchema({
                     throw new Error('max_stock cannot be less than min_stock');
                 }
                 return true;
-            }
-        }
+            },
+        },
     },
-    
+
     quantity: {
         in: ['body'],
         isInt: {
@@ -74,15 +74,26 @@ const AddFishStock = checkSchema({
         custom: {
             options: (value, { req }) => {
                 if (value < req.body.min_stock || value > req.body.max_stock) {
-                    throw new Error('quantity must be between min_stock and max_stock');
+                    throw new Error(
+                        'quantity must be between min_stock and max_stock'
+                    );
                 }
                 return true;
-            }
-        }
+            },
+        },
     },
 });
 
 const AddFishType = checkSchema({
+    price: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'price must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'price cannot be empty',
+        },
+    },
     type: {
         in: ['body'],
         isString: {
@@ -112,13 +123,21 @@ const EditFishType = checkSchema({
         notEmpty: {
             errorMessage: 'type cannot be empty',
         },
-    }
-})
-
+    },
+    price: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'price must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'price cannot be empty',
+        },
+    },
+});
 
 module.exports = {
     GetFishSchema,
     AddFishStock,
     AddFishType,
-    EditFishType
+    EditFishType,
 };
