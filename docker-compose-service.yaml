@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    container_name: e-fishware-v2
+    image: rifqio/e-fishware-v2
+    build: .
+    ports:
+      - "4300:4000"
+    env_file:
+      - .env
+    volumes:
+      - ./config/firebase_env.json:/usr/src/app/config/firebase_env.json

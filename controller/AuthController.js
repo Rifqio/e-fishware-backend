@@ -15,10 +15,11 @@ const Register = async (req, res) => {
             return res.forbidden('User already exists');
         }
 
-        const isPasswordMatch = await AuthService.CheckRepeatPassword(
+        const isPasswordMatch = AuthService.CheckRepeatPassword(
             password,
             repeat_password
         );
+        
         if (!isPasswordMatch) {
             return res.badRequest('Password does not match');
         }

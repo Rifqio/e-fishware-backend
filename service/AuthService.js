@@ -11,7 +11,7 @@ const FindExistingUser = async (email) => {
     });
 };
 
-const CheckRepeatPassword = async (password, repeatPassword) => {
+const CheckRepeatPassword = (password, repeatPassword) => {
     return password === repeatPassword;
 };
 
