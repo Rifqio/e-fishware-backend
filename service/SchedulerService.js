@@ -96,6 +96,7 @@ const RevertOriginalPriceJob = async () => {
 };
 
 const SchedulerGroup = async () => {
+    Logger.info(`[${Namespace}::SchedulerGroup] | Initiating Scheduler Group`);
     await RevertOriginalPriceJob();
 };
 

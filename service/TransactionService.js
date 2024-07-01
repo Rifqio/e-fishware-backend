@@ -114,7 +114,9 @@ const GetTransactionHistory = async (query) => {
     };
 
     if (fishType) {
-        options.where.fish_type = fishType;
+        options.where.fish_type = {
+            contains: fishType,
+        };
     }
 
     if (warehouseId) {

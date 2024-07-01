@@ -25,7 +25,18 @@ const SeedUser = async (req, res) => {
     }
 }
 
+const SeedWarehouse = async (req, res) => {
+    try {
+        await SeedService.SeedWarehouse();
+        return res.success();
+    } catch (error) {
+        Logger.error(`[${Namespace}::SeedWarehouse] | Error: ${error.message} | Stack: ${error.stack}`);
+        return res.internalServerError();
+    }
+}
+
 module.exports = {
     SeedFish,
-    SeedUser
+    SeedUser,
+    SeedWarehouse
 }

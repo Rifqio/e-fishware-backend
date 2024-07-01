@@ -7,7 +7,9 @@ const GetFish = async (type, warehouseId) => {
     if (type && warehouseId) {
         return await DB.fishStock.findMany({
             where: {
-                fish_type: type,
+                fish_type: {
+                    contains: type,
+                },
                 warehouse_id: intWarehouseId,
             },
         });
@@ -15,7 +17,9 @@ const GetFish = async (type, warehouseId) => {
     if (type) {
         return await DB.fishStock.findMany({
             where: {
-                fish_type: type,
+                fish_type: {
+                    contains: type,
+                },
             },
         });
     }
@@ -30,16 +34,26 @@ const GetFish = async (type, warehouseId) => {
 };
 
 const GetFishType = async () => {
-    return await DB.fish.findMany({
+    const data = await DB.fish.findMany({
         orderBy: {
             type: 'asc',
         },
     });
+
+    const transformedData = data.map((item) => {
+        return {
+            id_fish: item.id_fish,
+            type: item.type,
+            price_per_kg: item.price.toLocaleString(),
+        };
+    });
+
+    return transformedData;
 };
 
 const GetFishPrice = async (fishType = null, fishId = null) => {
     let whereCondition = {};
-    
+
     if (fishType) {
         whereCondition = {
             type: fishType,
@@ -67,7 +81,14 @@ const GetFishById = async (fishId) => {
 };
 
 const AddFishStock = async (data) => {
-    const { fish_type, warehouse_id, quantity, min_stock, max_stock, fishPrice } = data;
+    const {
+        fish_type,
+        warehouse_id,
+        quantity,
+        min_stock,
+        max_stock,
+        fishPrice,
+    } = data;
     const sanitizedFishType = fish_type.replace(/\s+/g, '-');
     const id_fish_stock = `${sanitizedFishType}-${warehouse_id}`;
     const totalPrice = fishPrice * quantity;
@@ -173,5 +194,5 @@ module.exports = {
     AddFishType,
     EditFishType,
     GetFishById,
-    GetFishPrice
+    GetFishPrice,
 };
