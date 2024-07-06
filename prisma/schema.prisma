@@ -71,17 +71,18 @@ model FishStockTransaction {
 }
 
 model Promotion {
-  id_promotion  String   @id @default(uuid())
-  fish          Fish     @relation(fields: [fish_id], references: [id_fish])
-  fish_id       String
-  is_active     Boolean
-  base_price    Int      @default(0)
-  discount      Int      @default(0)
-  start_date    DateTime
-  end_date      DateTime
-  created_at    DateTime @default(now())
-  created_by_id User     @relation("UserPromotions", fields: [created_by], references: [id_user])
-  created_by    String
+  id_promotion     String   @id @default(uuid())
+  fish             Fish     @relation(fields: [fish_id], references: [id_fish])
+  fish_id          String
+  is_active        Boolean
+  base_price       Int      @default(0)
+  discounted_price Int      @default(0)
+  discount         Int      @default(0)
+  start_date       DateTime
+  end_date         DateTime
+  created_at       DateTime @default(now())
+  created_by_id    User     @relation("UserPromotions", fields: [created_by], references: [id_user])
+  created_by       String
 
   @@map("promotion")
 }

@@ -1,5 +1,6 @@
 const { Logger } = require("../utils/logger");
 const PromotionService = require('../service/PromotionService');
+const { isEmpty } = require("lodash");
 
 const Namespace = 'PromotionController';
 const GetPromotion = async (req, res) => {
@@ -16,15 +17,22 @@ const GetPromotion = async (req, res) => {
 
 const AddPromotion = async (req, res) => {
     const { user_id } = req.user;
-    const { fishId, discount } = req.body;
+    const { fishId } = req.body;
     try {
+        const isPromotionValid = await PromotionService.ValidatePromotion(req.body);
+        if (!isEmpty(isPromotionValid)) {
+            Logger.info(`[${Namespace}::AddPromotion] | Promotion already exists for the given date range`);
+            return res.badRequest('Promotion already exists for the given date range');
+        }
+        
         const data = await PromotionService.AddPromotion(req.body, user_id);
         Logger.info(`[${Namespace}::AddPromotion] | data: ${JSON.stringify(data)}`);
 
-        const updateCurrentPrice = await PromotionService.UpdateCurrentPrice(fishId, discount);
+        const discountedPrice = data.discounted_price;
+        const updateCurrentPrice = await PromotionService.UpdateCurrentPrice(discountedPrice, fishId);
         Logger.info(`[${Namespace}::AddPromotion] | updateCurrentPrice: ${JSON.stringify(updateCurrentPrice)}`);
         
-        return res.createdWithData(data, 'Promotion added successfully');
+        return res.createdWithData('data', 'Promotion added successfully');
     } catch (error) {
         Logger.error(`[${Namespace}::AddPromotion] | error: ${error} | stack ${error.stack}`);
         if (error.message === 'Fish id not found') {

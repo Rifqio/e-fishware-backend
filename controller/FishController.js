@@ -1,4 +1,4 @@
-const { isEmpty } = require('lodash');
+const { isEmpty, toInteger } = require('lodash');
 const FishService = require('../service/FishService');
 const { Logger } = require('../utils/logger');
 
@@ -85,7 +85,7 @@ const EditFishStock = async (req, res) => {
 const AddFishType = async (req, res) => {
     const { type, price } = req.body
     try {
-        const fish = await FishService.AddFishType(type, price);
+        const fish = await FishService.AddFishType(type, toInteger(price));
         return res.createdWithData(fish, 'Fish type added successfully');
     } catch (error) {
         Logger.error(
@@ -102,7 +102,7 @@ const EditFishType = async (req, res) => {
         if (isEmpty(validateFishId)) {
             return res.badRequest('Fish type not found');
         }
-        const fish = await FishService.EditFishType(fish_id, type, price);
+        const fish = await FishService.EditFishType(fish_id, type, toInteger(price));
         return res.successWithData(fish, 'Fish type updated successfully');
     } catch (error) {
         Logger.error(

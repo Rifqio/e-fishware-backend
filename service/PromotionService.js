@@ -13,7 +13,6 @@ const GetPromotion = async (isActive) => {
             is_active: true,
             start_date: true,
             end_date: true,
-            created_by: true,
             base_price: true,
             discount: true,
         },
@@ -21,21 +20,54 @@ const GetPromotion = async (isActive) => {
 
     const transformedData = data.map((item) => {
         const discountPercentage = item.discount / 100;
-        const discountedPrice = item.base_price - item.base_price * discountPercentage;
-        
+        const discountedPrice =
+            item.base_price - item.base_price * discountPercentage;
+
         return {
             fish_type: item.fish.type,
             is_active: item.is_active,
-            base_price: item.base_price,
-            discounted_price: discountedPrice,
+            base_price: item.base_price.toLocaleString(),
+            discounted_price: discountedPrice.toLocaleString(),
             discount: item.discount,
             start_date: item.start_date,
             end_date: item.end_date,
-            created_by: item.created_by,
         };
     });
 
     return transformedData;
+};
+
+const ValidatePromotion = async (payload) => {
+    const { fishId, startDate, endDate } = payload 
+    const data = await db.promotion.findFirst({
+        where: {
+            fish_id: fishId,
+            OR: [
+                {
+                    start_date: {
+                        lte: new Date(endDate),
+                    },
+                    end_date: {
+                        gte: new Date(startDate),
+                    },
+                },
+                {
+                    start_date: {
+                        gte: new Date(startDate),
+                        lte: new Date(endDate),
+                    },
+                },
+                {
+                    end_date: {
+                        gte: new Date(startDate),
+                        lte: new Date(endDate),
+                    },
+                },
+            ],
+        },
+    });
+
+    return data;
 };
 
 const AddPromotion = async (payload, userId) => {
@@ -56,8 +88,11 @@ const AddPromotion = async (payload, userId) => {
         },
         select: {
             price: true,
-        }
+        },
     });
+
+    const price = fishPrice.price;
+    const discountedPrice = price - price * (discount / 100);
 
     return await db.promotion.create({
         data: {
@@ -68,23 +103,12 @@ const AddPromotion = async (payload, userId) => {
             created_by: userId,
             discount: discount,
             base_price: fishPrice.price,
+            discounted_price: discountedPrice,
         },
     });
 };
 
-const UpdateCurrentPrice = async (fishId, discount) => {
-    const fishPrice = await db.fish.findFirst({
-        where: {
-            id_fish: fishId,
-        },
-        select: {
-            price: true,
-        }
-    });
-
-    const discountPercentage = discount / 100;
-    const discountedPrice = fishPrice.price - fishPrice.price * discountPercentage;
-
+const UpdateCurrentPrice = async (discountedPrice, fishId) => {
     return await db.fish.update({
         where: {
             id_fish: fishId,
@@ -93,8 +117,7 @@ const UpdateCurrentPrice = async (fishId, discount) => {
             price: discountedPrice,
         },
     });
-
-}
+};
 
 const DeletePromotion = async (id) => {
     const validateFishId = await db.promotion.findFirst({
@@ -118,5 +141,6 @@ module.exports = {
     GetPromotion,
     DeletePromotion,
     AddPromotion,
-    UpdateCurrentPrice
+    ValidatePromotion,
+    UpdateCurrentPrice,
 };
