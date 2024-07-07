@@ -1,0 +1,47 @@
+[
+    {
+        "fish_type": "Salmon",
+        "is_active": true,
+        "base_price": 10000,
+        "discounted_price": 8000,
+        "discount": 20,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31"
+    },
+    {
+        "fish_type": "Tuna",
+        "is_active": true,
+        "base_price": 20000,
+        "discounted_price": 16000,
+        "discount": 20,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31"
+    },
+    {
+        "fish_type": "Shrimp",
+        "is_active": true,
+        "base_price": 5000,
+        "discounted_price": 4000,
+        "discount": 20,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31"
+    },
+    {
+        "fish_type": "Crab",
+        "is_active": true,
+        "base_price": 15000,
+        "discounted_price": 12000,
+        "discount": 20,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31"
+    },
+    {
+        "fish_type": "Lobster",
+        "is_active": true,
+        "base_price": 25000,
+        "discounted_price": 20000,
+        "discount": 20,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31"
+    }
+]

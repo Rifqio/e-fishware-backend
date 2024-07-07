@@ -1,5 +1,6 @@
 const { isEmpty } = require('lodash');
 const db = require('../utils/database');
+const GetPromotionMock = require('../_mock/GetPromotion.json');
 
 const GetPromotion = async (isActive) => {
     const data = await db.promotion.findMany({
@@ -17,6 +18,8 @@ const GetPromotion = async (isActive) => {
             discount: true,
         },
     });
+
+    if (isEmpty) return GetPromotionMock;
 
     const transformedData = data.map((item) => {
         const discountPercentage = item.discount / 100;
