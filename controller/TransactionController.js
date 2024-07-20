@@ -11,10 +11,10 @@ const CreateTransaction = async (req, res) => {
 
     try {
         if (transaction_type === TransactionType.ADD) {
-            if (isEmpty(req.query?.supplier_id)) return res.badRequest('Supplier is empty');
+            if (isEmpty(req.body?.supplier_id)) return res.badRequest('Supplier is empty');
         }
 
-        const supplierId = req.query.supplier_id || 0;
+        const supplierId = req.body.supplier_id || 0;
 
         let payload = {
             fish_type,
