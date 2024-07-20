@@ -19,7 +19,7 @@ route.use('/auth', AuthRoutes);
 route.use('/transaction', TransactionRoutes);
 route.use('/notification', NotificationRoute);
 route.use('/seed', SeedRoutes);
-// route.use(AuthVerify);
+route.use(AuthVerify);
 route.use('/fish', FishRoutes);
 route.use('/chart', ChartRoutes);
 route.use('/list', ListRoutes);
