@@ -24,10 +24,23 @@ const ValidateFishStock = async (fishType, warehouseId) => {
         minStock: fishStock.min_stock,
         maxStock: fishStock.max_stock,
         quantity: fishStock.quantity,
-        totalPrice: fishStock.total_price
+        totalPrice: fishStock.total_price,
     };
 
     return data;
+};
+
+const GetWarehouseCapacity = async (warehouseId) => {
+    const data = await DB.warehouse.findFirst({
+        where: {
+            id_warehouse: warehouseId,
+        },
+        select: {
+            max_capacity: true,
+        },
+    });
+
+    return data.max_capacity;
 };
 
 const GetFishPrice = async (fishType) => {
@@ -37,17 +50,25 @@ const GetFishPrice = async (fishType) => {
         },
         select: {
             price: true,
-        }
+        },
     });
 };
 
 const AddFishStock = async (payload, currentQuantity) => {
-    const { fish_stock_id, quantity, user_id, totalPrice, currentTotalPrice } = payload;
+    const {
+        fish_stock_id,
+        quantity,
+        user_id,
+        totalPrice,
+        currentTotalPrice,
+        supplierId,
+    } = payload;
     const updatedPrice = currentTotalPrice + totalPrice;
 
     const transaction = await DB.$transaction(async (tx) => {
         await tx.fishStockTransaction.create({
             data: {
+                supplier_id: supplierId,
                 quantity: quantity,
                 transaction_type: TransactionType.ADD,
                 fish_stock_id: fish_stock_id,
@@ -73,12 +94,14 @@ const AddFishStock = async (payload, currentQuantity) => {
 };
 
 const DeductFishStock = async (payload, currentQuantity) => {
-    const { fish_stock_id, quantity, user_id, totalPrice, currentTotalPrice } = payload;
+    const { fish_stock_id, quantity, user_id, totalPrice, currentTotalPrice } =
+        payload;
     const updatedPrice = currentTotalPrice - totalPrice;
- 
+
     const transaction = await DB.$transaction(async (tx) => {
         await tx.fishStockTransaction.create({
             data: {
+                supplier_id: 0,
                 quantity: quantity,
                 transaction_type: TransactionType.DEDUCT,
                 fish_stock_id: fish_stock_id,
@@ -183,5 +206,6 @@ module.exports = {
     GetTransactionHistory,
     GenerateToPdf,
     GetFirebaseToken,
+    GetWarehouseCapacity,
     GetFishPrice,
 };

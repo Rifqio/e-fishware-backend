@@ -2,6 +2,7 @@ const { TransactionType } = require('../utils/constants');
 const { Logger } = require('../utils/logger');
 const TransactionService = require('../service/TransactionService');
 const NotificationService = require('../service/NotificationService');
+const { isEmpty } = require('lodash');
 
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
@@ -9,7 +10,20 @@ const CreateTransaction = async (req, res) => {
     const { user_id } = req.user;
 
     try {
-        let payload = { fish_type, warehouse_id, quantity, user_id };
+        if (transaction_type === TransactionType.ADD) {
+            if (isEmpty(req.query?.supplier_id)) return res.badRequest('Supplier is empty');
+        }
+
+        const supplierId = req.query.supplier_id || 0;
+
+        let payload = {
+            fish_type,
+            warehouse_id,
+            quantity,
+            user_id,
+            supplierId,
+        };
+
         const validateStock = await TransactionService.ValidateFishStock(
             fish_type,
             warehouse_id
@@ -52,6 +66,12 @@ const CreateTransaction = async (req, res) => {
         if (transaction_type === TransactionType.ADD) {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;
+
+            const currentCapacity = await TransactionService.GetWarehouseCapacity(warehouse_id);
+
+            if (updatedStock > currentCapacity) {
+                return res.badRequest('Warehouse capacity full');
+            }
 
             if (updatedStock > validateStock.maxStock) {
                 return res.badRequest('Stock exceeds the maximum limit');
@@ -107,8 +127,8 @@ const CreateTransaction = async (req, res) => {
 const GetTransactionHistory = async (req, res) => {
     try {
         const { download } = req.query;
-
         const transactionHistory = await TransactionService.GetTransactionHistory(req.query);
+        
         if (download) {
             const generatePdf = await TransactionService.GenerateToPdf(
                 transactionHistory
@@ -124,7 +144,6 @@ const GetTransactionHistory = async (req, res) => {
         return res.internalServerError();
     }
 };
-
 module.exports = {
     CreateTransaction,
     GetTransactionHistory,

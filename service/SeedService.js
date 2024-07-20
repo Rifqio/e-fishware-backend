@@ -45,8 +45,20 @@ const SeedWarehouse = async () => {
     }
 };
 
+const SeedSuppliers = async () => {
+    for (let i = 1; i <= 10; i++) {
+        const region = fakerID_ID.location.city();
+        await DB.suppliers.create({
+            data: {
+                region,
+            },
+        });
+    }
+};
+
 module.exports = {
     SeedFish,
     SeedUser,
-    SeedWarehouse
+    SeedWarehouse,
+    SeedSuppliers,
 };

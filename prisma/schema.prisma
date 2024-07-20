@@ -25,6 +25,7 @@ model User {
 model Warehouse {
   id_warehouse Int         @id @default(autoincrement())
   name         String
+  max_capacity Int         @default(0)
   fishes       FishStock[]
 
   @@map("warehouse")
@@ -55,6 +56,14 @@ model FishStock {
   @@map("fish_stock")
 }
 
+model Suppliers {
+  id_supplier Int    @id @default(autoincrement())
+  region      String
+  // FishStockTransaction FishStockTransaction[]
+
+  @@map("suppliers")
+}
+
 model FishStockTransaction {
   id_fish_stock_transaction Int             @id @default(autoincrement())
   quantity                  Int
@@ -62,8 +71,10 @@ model FishStockTransaction {
   price                     Int             @default(0)
   created_at                DateTime        @default(now())
   updated_at                DateTime        @default(now())
-  updated_by                String
   updated_by_id             User            @relation(fields: [updated_by], references: [id_user])
+  updated_by                String
+  // Suppliers                 Suppliers?      @relation(fields: [supplier_id], references: [id_supplier])
+  supplier_id               Int?            @default(0)
   FishStock                 FishStock?      @relation(fields: [fish_stock_id], references: [id_fish_stock])
   fish_stock_id             String?
 
