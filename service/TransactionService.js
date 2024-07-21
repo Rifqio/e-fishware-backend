@@ -189,7 +189,7 @@ const GenerateInvoice = async (data) => {
     };
     const outputPath = `./assets/invoice/invoice-${formattedDate}.pdf`;
     const options = {
-        format: 'A6',
+        format: 'A5',
         orientation: 'landscape',
         border: '1mm',
     };
