@@ -7,7 +7,7 @@
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 margin: 20px;
-                font-size: 14px;
+                font-size: 12px;
                 background-color: #f5f5f5;
                 color: #333;
             }
@@ -34,6 +34,7 @@
             }
             td {
                 text-align: center;
+                font-size: 10px;
             }
             tr {
                 font-size: 12px;
@@ -57,13 +58,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>Fish Type</th>
-                    <th>Quantity</th>
-                    <th>Transaction Type</th>
+                    <th>Fish Name</th>
+                    <th>Quantity (Kg)</th>
+                    <th>Type</th>
                     <th>Warehouse</th>
                     <th>Price</th>
                     <th>Created At</th>
-                    <th>Updated By</th>
                 </tr>
             </thead>
             <tbody>
@@ -75,7 +75,6 @@
                     <td>{{ this.warehouse_name }}</td>
                     <td>{{ this.price }}</td>
                     <td>{{ this.created_at }}</td>
-                    <td>{{ this.updated_by }}</td>
                 </tr>
                 {{/each}}
             </tbody>
