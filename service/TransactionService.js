@@ -213,7 +213,7 @@ const GenerateInvoice = async (data) => {
 const GenerateToPdf = async (data) => {
     const html = fs.readFileSync('./assets/transaction-history.html', 'utf-8');
     const options = {
-        format: 'A5',
+        format: 'A3',
         orientation: 'portrait',
         border: '1mm',
     };
