@@ -108,6 +108,37 @@ const AddFishStock = async (data) => {
     return fishStock;
 };
 
+const AddFishStockAll = async (data) => {
+    const { fish_type, quantity, min_stock, max_stock, fishPrice } = data;
+
+    const sanitizedFishType = fish_type.replace(/\s+/g, '-');
+    const totalPrice = fishPrice * quantity;
+
+    const warehouses = await DB.warehouse.findMany({
+        select: {
+            id_warehouse: true,
+        },
+    });
+
+    const fishStockPromises = warehouses.map(async (warehouse) => {
+        const id_fish_stock = `${sanitizedFishType}-${warehouse.id_warehouse}`;
+        return await DB.fishStock.create({
+            data: {
+                fish_type: fish_type,
+                warehouse_id: warehouse.id_warehouse,
+                quantity,
+                total_price: totalPrice,
+                min_stock,
+                max_stock,
+                id_fish_stock: id_fish_stock.toLowerCase(),
+            },
+        });
+    });
+
+    const fishStocks = await Promise.all(fishStockPromises);
+    return fishStocks;
+};
+
 const ValidateFishTypeWarehouse = async (fishType, warehouseId) => {
     const fish = await DB.fish.findFirst({
         where: {
@@ -130,6 +161,16 @@ const ValidateFishTypeWarehouse = async (fishType, warehouseId) => {
     }
 
     return { fish, warehouse };
+};
+
+const ValidateFishInWarehouse = async (fishType) => {
+    const data = await DB.fishStock.findFirst({
+        where: {
+            fish_type: fishType,
+        },
+    });
+
+    return data;
 };
 
 const AddFishType = async (type, price) => {
@@ -195,4 +236,6 @@ module.exports = {
     EditFishType,
     GetFishById,
     GetFishPrice,
+    AddFishStockAll,
+    ValidateFishInWarehouse,
 };

@@ -59,6 +59,33 @@ const AddFishStock = async (req, res) => {
     }
 };
 
+const AddFishStockAll = async (req, res) => {
+    const { fish_type } = req.body;
+
+    try {
+        const validateFishStock = await FishService.ValidateFishInWarehouse(fish_type);
+        if (validateFishStock) {
+            return res.badRequest('Fish stock in one of the warehouse already exists');
+        }
+
+        const getBasePrice = await FishService.GetFishPrice(fish_type);
+        const fishPrice = getBasePrice.price;
+
+        req.body = {
+            ...req.body,
+            fishPrice
+        };
+
+        const data = await FishService.AddFishStockAll(req.body);
+        return res.createdWithData(data, 'Fish stock added successfully on all warehouses');
+    } catch (error) {
+        Logger.error(
+            `[${Namespace}::AddFishStockAll] | Error: ${error.message} | Stack: ${error.stack}`
+        );
+        return res.internalServerError();
+    }
+}
+
 const EditFishStock = async (req, res) => {
     const { fish_type, warehouse_id } = req.body
     try {
@@ -118,5 +145,6 @@ module.exports = {
     EditFishType,
     AddFishStock,
     EditFishStock,
+    AddFishStockAll,
     AddFishType
 };

@@ -70,5 +70,6 @@ lerna-debug.log*
 *.sln
 *.sw?
 
+/assets/invoice/*
 package-lock.json
 /config/firebase_env.json

@@ -3,6 +3,7 @@ const { Logger } = require('../utils/logger');
 const TransactionService = require('../service/TransactionService');
 const NotificationService = require('../service/NotificationService');
 const { isEmpty } = require('lodash');
+const moment = require('moment');
 
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
@@ -11,7 +12,8 @@ const CreateTransaction = async (req, res) => {
 
     try {
         if (transaction_type === TransactionType.ADD) {
-            if (isEmpty(req.body?.supplier_id)) return res.badRequest('Supplier is empty');
+            console.log(req.body.supplier_id, 'HERE');
+            if (!req.body.supplier_id) return res.badRequest('supplier_id is empty');
         }
 
         const supplierId = req.body.supplier_id || 0;
@@ -45,6 +47,7 @@ const CreateTransaction = async (req, res) => {
 
         let updatedStock = 0;
         let updatedData;
+        let fileUrl;
 
         const totalPrice = quantity * fishPrice;
 
@@ -83,6 +86,9 @@ const CreateTransaction = async (req, res) => {
             );
 
             const fishType = updatedData.fish_type;
+            const currentDate = moment().utc().format('MMMM D, YYYY');
+            const invoiceData = { quantity, fishType, totalPrice, currentDate, fishPrice };
+            fileUrl = await TransactionService.GenerateInvoice(invoiceData);
 
             if (updatedStock >= validateStock.maxStock) {
                 NotificationService.SendNotification(
@@ -107,6 +113,11 @@ const CreateTransaction = async (req, res) => {
             );
 
             const fishType = updatedData.fish_type;
+
+            const currentDate = moment().utc().format('MMMM D, YYYY');
+            const invoiceData = { quantity, fishType, totalPrice, currentDate, fishPrice };
+            fileUrl = await TransactionService.GenerateInvoice(invoiceData);
+
             if (updatedStock <= validateStock.minStock) {
                 NotificationService.SendNotification(
                     firebaseToken.fcm_token,
@@ -115,7 +126,12 @@ const CreateTransaction = async (req, res) => {
             }
         }
 
-        return res.successWithData(updatedData, 'Transaction success');
+        const response = {
+            ...updatedData,
+            file_url: fileUrl
+        }
+
+        return res.successWithData(response, 'Transaction success');
     } catch (error) {
         Logger.error(
             `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`

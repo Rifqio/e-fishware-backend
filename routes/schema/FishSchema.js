@@ -17,6 +17,64 @@ const GetFishSchema = checkSchema({
     },
 });
 
+const AddFishStockAll = checkSchema({
+    fish_type: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'fish_type must be a string',
+        },
+        notEmpty: {
+            errorMessage: 'fish_type cannot be empty',
+        },
+    },
+    min_stock: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'min_stock must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'min_stock cannot be empty',
+        },
+    },
+    max_stock: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'max_stock must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'max_stock cannot be empty',
+        },
+        custom: {
+            options: (value, { req }) => {
+                if (value < req.body.min_stock) {
+                    throw new Error('max_stock cannot be less than min_stock');
+                }
+                return true;
+            },
+        },
+    },
+
+    quantity: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'quantity must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'quantity cannot be empty',
+        },
+        custom: {
+            options: (value, { req }) => {
+                if (value < req.body.min_stock || value > req.body.max_stock) {
+                    throw new Error(
+                        'quantity must be between min_stock and max_stock'
+                    );
+                }
+                return true;
+            },
+        },
+    },
+});
+
 const AddFishStock = checkSchema({
     fish_type: {
         in: ['body'],
@@ -139,5 +197,6 @@ module.exports = {
     GetFishSchema,
     AddFishStock,
     AddFishType,
+    AddFishStockAll,
     EditFishType,
 };

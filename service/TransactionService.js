@@ -180,10 +180,40 @@ const GetFirebaseToken = async (userId) => {
     });
 };
 
+const GenerateInvoice = async (data) => {
+    const html = fs.readFileSync('./assets/invoice.html', 'utf-8');
+    const formattedDate = moment().format('DDMMYYHHmmSS');
+    data = {
+        ...data,
+        formattedDate,
+    };
+    const outputPath = `./assets/invoice/invoice-${formattedDate}.pdf`;
+    const options = {
+        format: 'A6',
+        orientation: 'landscape',
+        border: '1mm',
+    };
+
+    const document = {
+        html: html,
+        data: {
+            data: data,
+        },
+        path: outputPath,
+        type: 'stream',
+    };
+
+    const pdfBuffer = await pdf.create(document, options);
+    await fs.promises.writeFile(outputPath, pdfBuffer);
+
+    const fileUrl = process.env.APP_HOST + `/invoice/invoice-${formattedDate}.pdf`;
+    return fileUrl;
+};
+
 const GenerateToPdf = async (data) => {
     const html = fs.readFileSync('./assets/transaction-history.html', 'utf-8');
     const options = {
-        format: 'A4',
+        format: 'A5',
         orientation: 'portrait',
         border: '1mm',
     };
@@ -208,4 +238,5 @@ module.exports = {
     GetFirebaseToken,
     GetWarehouseCapacity,
     GetFishPrice,
+    GenerateInvoice,
 };

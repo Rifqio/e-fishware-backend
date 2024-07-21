@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const { Logger } = require('./utils/logger');
@@ -21,6 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use(ResponseMiddleware);
 app.use(HttpLogger);
+app.use('/invoice', express.static(path.join(__dirname, 'assets/invoice')));
 app.use('/api', routes);
 
 app.listen(port, async () => {

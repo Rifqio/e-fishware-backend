@@ -4,9 +4,6 @@ const { Logger } = require('./logger');
 const prisma = new PrismaClient({
     log: [{ emit: 'event', level: 'query' }, 'info', 'warn', 'error'],
     errorFormat: 'pretty',
-    transactionOptions: {
-        isolationLevel: 'RepeatableRead',
-    }
 });
 
 async function generateFishId() {
