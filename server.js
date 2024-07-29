@@ -23,6 +23,7 @@ app.use(express.json());
 app.use(ResponseMiddleware);
 app.use(HttpLogger);
 app.use('/invoice', express.static(path.join(__dirname, 'assets/invoice')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/api', routes);
 
 app.listen(port, async () => {
