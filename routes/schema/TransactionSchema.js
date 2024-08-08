@@ -1,5 +1,6 @@
 const { checkSchema } = require('express-validator');
 const { TransactionType } = require('../../utils/constants');
+const _ = require('lodash');
 
 const currentYear = new Date().getFullYear();
 
@@ -29,6 +30,59 @@ const CreateFishTransaction = checkSchema({
         },
         notEmpty: {
             errorMessage: 'quantity cannot be empty',
+        },
+    },
+    transaction_type: {
+        in: ['body'],
+        custom: {
+            options: (value) => {
+                if (!Object.values(TransactionType).includes(value)) {
+                    throw new Error(
+                        'transaction_type must be either IN or OUT'
+                    );
+                }
+                return true;
+            },
+        },
+    },
+});
+
+const CreateFishGroupTransaction = checkSchema({
+    fish: {
+        in: ['body'],
+        isArray: {
+            errorMessage: 'fish must be an array',
+        },
+        custom: {
+            options: (fishArray) => {
+                fishArray.forEach(fish => {
+                    if (!_.isPlainObject(fish)) {
+                        throw new Error('Each fish must be an object');
+                    }
+                    if (!_.has(fish, 'id_fish')) {
+                        throw new Error('Each fish must have an id_fish property');
+                    }
+                    if (!_.isString(fish.id_fish)) {
+                        throw new Error('id_fish must be a string');
+                    }
+                    if (!_.has(fish, 'quantity')) {
+                        throw new Error('Each fish must have a quantity property');
+                    }
+                    if (!_.isInteger(fish.quantity)) {
+                        throw new Error('quantity must be an integer');
+                    }
+                });
+                return true;
+            },
+        },
+    },
+    warehouse_id: {
+        in: ['body'],
+        isInt: {
+            errorMessage: 'warehouse_id must be an integer',
+        },
+        notEmpty: {
+            errorMessage: 'warehouse_id cannot be empty',
         },
     },
     transaction_type: {
@@ -98,7 +152,8 @@ const TransactionHistory = checkSchema({
     year: {
         in: ['query'],
         isInt: {
-            errorMessage: 'year must be an integer and between 10 years ago and current year',
+            errorMessage:
+                'year must be an integer and between 10 years ago and current year',
             options: {
                 min: currentYear - 10,
                 max: currentYear,
@@ -118,4 +173,5 @@ const TransactionHistory = checkSchema({
 module.exports = {
     CreateFishTransaction,
     TransactionHistory,
+    CreateFishGroupTransaction
 };

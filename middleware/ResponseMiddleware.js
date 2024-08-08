@@ -1,7 +1,16 @@
+const { BusinessException } = require('../utils/exception/Exception');
 const { Generatetransaction_id } = require('../utils/helpers');
 const ResponseMiddleware = (req, res, next) => {
     req.transaction_id = Generatetransaction_id();
     
+    // if (err instanceof BusinessException) {
+    //     return res.status(err.statusCode).json({
+    //         status: false,
+    //         transaction_id: err.transactionId,
+    //         message: err.message,
+    //     });
+    // }
+
     res.success = (message = null) => {
         return res.status(200).json({
             status: true,
@@ -67,6 +76,17 @@ const ResponseMiddleware = (req, res, next) => {
             message: message || 'Internal Server Error',
         });
     };
+
+    res.businessError = (err = null) => {
+        if (err instanceof BusinessException) {
+            return res.status(err.statusCode).json({
+                status: false,
+                transaction_id: err.transactionId,
+                message: err.message,
+            });
+        }
+        return res.internalServerError();
+    }
 
     res.sendPdf = (pdf, filename) => {
         res.setHeader('Content-Type', 'application/pdf');

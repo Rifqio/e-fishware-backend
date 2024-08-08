@@ -4,7 +4,7 @@ const ListSchema = checkSchema({
     type: {
         in: ['query'],
         matches: {
-            options: ['^(fish|warehouse|supplier)$', 'i'],
+            options: ['^(fish|warehouse|supplier|registered-fish)$', 'i'],
             errorMessage: 'type is invalid',
         },
         notEmpty: {

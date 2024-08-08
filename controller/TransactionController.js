@@ -2,8 +2,9 @@ const { TransactionType } = require('../utils/constants');
 const { Logger } = require('../utils/logger');
 const TransactionService = require('../service/TransactionService');
 const NotificationService = require('../service/NotificationService');
-const { isEmpty } = require('lodash');
 const moment = require('moment');
+const { BusinessException } = require('../utils/exception/Exception');
+const { sumBy } = require('lodash');
 
 const Namespace = 'TransactionController';
 const CreateTransaction = async (req, res) => {
@@ -12,8 +13,8 @@ const CreateTransaction = async (req, res) => {
 
     try {
         if (transaction_type === TransactionType.ADD) {
-            console.log(req.body.supplier_id, 'HERE');
-            if (!req.body.supplier_id) return res.badRequest('supplier_id is empty');
+            if (!req.body.supplier_id)
+                return res.badRequest('supplier_id is empty');
         }
 
         const supplierId = req.body.supplier_id || 0;
@@ -70,9 +71,10 @@ const CreateTransaction = async (req, res) => {
             Logger.info(`[${Namespace}::CreateTransaction] | Add stock`);
             updatedStock = quantity + currentQuantity;
 
-            const currentCapacity = await TransactionService.GetWarehouseCapacity(warehouse_id);
+            const currentCapacity =
+                await TransactionService.GetWarehouseCapacity(warehouse_id);
 
-            if (updatedStock > currentCapacity) {
+            if (updatedStock > currentCapacity.max_capacity) {
                 return res.badRequest('Warehouse capacity full');
             }
 
@@ -87,7 +89,13 @@ const CreateTransaction = async (req, res) => {
 
             const fishType = updatedData.fish_type;
             const currentDate = moment().utc().format('MMMM D, YYYY');
-            const invoiceData = { quantity, fishType, totalPrice, currentDate, fishPrice };
+            const invoiceData = {
+                quantity,
+                fishType,
+                totalPrice,
+                currentDate,
+                fishPrice,
+            };
             fileUrl = await TransactionService.GenerateInvoice(invoiceData);
 
             if (updatedStock >= validateStock.maxStock) {
@@ -115,7 +123,13 @@ const CreateTransaction = async (req, res) => {
             const fishType = updatedData.fish_type;
 
             const currentDate = moment().utc().format('MMMM D, YYYY');
-            const invoiceData = { quantity, fishType, totalPrice, currentDate, fishPrice };
+            const invoiceData = {
+                quantity,
+                fishType,
+                totalPrice,
+                currentDate,
+                fishPrice,
+            };
             fileUrl = await TransactionService.GenerateInvoice(invoiceData);
 
             if (updatedStock <= validateStock.minStock) {
@@ -128,8 +142,8 @@ const CreateTransaction = async (req, res) => {
 
         const response = {
             ...updatedData,
-            file_url: fileUrl
-        }
+            file_url: fileUrl,
+        };
 
         return res.successWithData(response, 'Transaction success');
     } catch (error) {
@@ -143,8 +157,9 @@ const CreateTransaction = async (req, res) => {
 const GetTransactionHistory = async (req, res) => {
     try {
         const { download } = req.query;
-        const transactionHistory = await TransactionService.GetTransactionHistory(req.query);
-        
+        const transactionHistory =
+            await TransactionService.GetTransactionHistory(req.query);
+
         if (download) {
             const generatePdf = await TransactionService.GenerateToPdf(
                 transactionHistory
@@ -160,7 +175,64 @@ const GetTransactionHistory = async (req, res) => {
         return res.internalServerError();
     }
 };
+
+const CreateGroupTransaction = async (req, res) => {
+    const { fish, warehouse_id, transaction_type, supplier_id } = req.body;
+    const { user_id } = req.user;
+
+    try {
+        // prettier-ignore
+        if (transaction_type === TransactionType.ADD && !supplier_id) {
+            return res.badRequest('supplier_id is empty');
+        }
+
+        let data;
+        // prettier-ignore
+        const fishDetail = await TransactionService.ValidateGroupStock({ fish, warehouse_id });
+
+        const totalQuantityAllFish = sumBy(fish, 'quantity');
+        // prettier-ignore
+        const warehouseCapacity = await TransactionService.GetWarehouseCapacity(warehouse_id);
+        // prettier-ignore
+        const expectedUpdatedStock = totalQuantityAllFish + warehouseCapacity.filled_capacity;
+        // prettier-ignore
+        if (expectedUpdatedStock > warehouseCapacity.max_capacity) throw BusinessException.warehouseStockFull();
+
+        if (transaction_type === TransactionType.ADD) {
+            data = await _addTransactionGroup({
+                fishPayload: fish,
+                fishDetail,
+            });
+        } else {
+            data = _deductTransactiionGroup();
+        }
+        return res.successWithData(fishDetail, 'Transaction success');
+    } catch (error) {
+        Logger.error(
+            `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`
+        );
+        return res.businessError(error);
+    }
+};
+
+const _addTransactionGroup = async ({ fishPayload, fishDetail }) => {
+    for (let i = 0; i < fishPayload.length; i++) {
+        const payload = fishPayload[i];
+        const detail = fishDetail[i];
+
+        const maxQuantity = detail.maxStock;
+        const totalExpectedQuantity = payload.quantity + detail.quantity;
+
+        // prettier-ignore
+        if (totalExpectedQuantity > maxQuantity) throw BusinessException.quantityExceedLimit();
+
+        // const updatedData =
+    }
+};
+
+const _deductTransactiionGroup = () => {};
 module.exports = {
     CreateTransaction,
+    CreateGroupTransaction,
     GetTransactionHistory,
 };

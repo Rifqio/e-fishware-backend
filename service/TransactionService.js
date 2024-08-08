@@ -30,17 +30,49 @@ const ValidateFishStock = async (fishType, warehouseId) => {
     return data;
 };
 
-const GetWarehouseCapacity = async (warehouseId) => {
-    const data = await DB.warehouse.findFirst({
-        where: {
-            id_warehouse: warehouseId,
-        },
-        select: {
-            max_capacity: true,
-        },
-    });
+const ValidateGroupStock = async ({ fish, warehouse_id }) => {
+    const mappedFish = await Promise.all(
+        fish.map(async (data) => {
+            const fishStock = await DB.fishStock.findFirst({
+                where: {
+                    fish: {
+                        id_fish: data.id_fish,
+                    },
+                    warehouse_id: warehouse_id,
+                },
+                include: {
+                    fish: {
+                        select: {
+                            price: true,
+                        },
+                    },
+                },
+            });
 
-    return data.max_capacity;
+            const transformedData = {
+                fishType: fishStock.fish_type,
+                fishStockId: fishStock.id_fish_stock,
+                minStock: fishStock.min_stock,
+                maxStock: fishStock.max_stock,
+                quantity: fishStock.quantity,
+                price: fishStock.fish.price,
+                totalPrice: fishStock.total_price,
+            };
+
+            return transformedData;
+        })
+    );
+
+    return mappedFish;
+};
+
+const GetWarehouseCapacity = async (warehouseId) => {
+    const query = await DB.$queryRaw`
+   SELECT SUM(fish_stock.quantity) AS filled_capacity, warehouse.max_capacity 
+   FROM fish_stock
+   JOIN warehouse ON fish_stock.warehouse_id = warehouse.id_warehouse 
+   WHERE fish_stock.warehouse_id = ${warehouseId}`;
+    return query[0];
 };
 
 const GetFishPrice = async (fishType) => {
@@ -187,6 +219,7 @@ const GenerateInvoice = async (data) => {
         ...data,
         formattedDate,
     };
+
     const outputPath = `./assets/invoice/invoice-${formattedDate}.pdf`;
     const options = {
         format: 'A5',
@@ -203,10 +236,14 @@ const GenerateInvoice = async (data) => {
         type: 'stream',
     };
 
-    const pdfBuffer = await pdf.create(document, options);
+    const pdfBuffer = await pdf.create(document, {
+        ...options,
+        timeout: 100000,
+    });
     await fs.promises.writeFile(outputPath, pdfBuffer);
 
-    const fileUrl = process.env.APP_HOST + `/invoice/invoice-${formattedDate}.pdf`;
+    const fileUrl =
+        process.env.APP_HOST + `/invoice/invoice-${formattedDate}.pdf`;
     return fileUrl;
 };
 
@@ -239,4 +276,5 @@ module.exports = {
     GetWarehouseCapacity,
     GetFishPrice,
     GenerateInvoice,
+    ValidateGroupStock,
 };

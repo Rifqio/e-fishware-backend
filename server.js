@@ -13,11 +13,13 @@ const { SchedulerGroup } = require('./service/SchedulerService');
 const app = express();
 const port = process.env.APP_PORT || 3000;
 
-app.use(cors({
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
-    origin: '*',
-}));
+app.use(
+    cors({
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
+        origin: '*',
+    })
+);
 
 app.use(express.json());
 app.use(ResponseMiddleware);
@@ -36,4 +38,4 @@ app.listen(port, async () => {
 process.on('unhandledRejection', (error) => {
     Logger.error('Unhandled Rejection: ' + error.message);
     process.exit(1);
-})
+});
