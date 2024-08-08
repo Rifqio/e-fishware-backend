@@ -233,13 +233,14 @@ const GenerateInvoice = async (data) => {
             data: data,
         },
         path: outputPath,
-        type: 'stream',
+        type: 'buffer',
     };
 
     const pdfBuffer = await pdf.create(document, {
         ...options,
         timeout: 100000,
     });
+    
     await fs.promises.writeFile(outputPath, pdfBuffer);
 
     const fileUrl =

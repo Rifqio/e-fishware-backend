@@ -96,6 +96,7 @@ const CreateTransaction = async (req, res) => {
                 currentDate,
                 fishPrice,
             };
+            
             fileUrl = await TransactionService.GenerateInvoice(invoiceData);
 
             if (updatedStock >= validateStock.maxStock) {
