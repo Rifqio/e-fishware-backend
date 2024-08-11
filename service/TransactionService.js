@@ -67,12 +67,12 @@ const ValidateGroupStock = async ({ fish, warehouse_id }) => {
 };
 
 const GetWarehouseCapacity = async (warehouseId) => {
-    const query = await DB.$queryRaw`
+   const query = await DB.$queryRaw`
    SELECT SUM(fish_stock.quantity) AS filled_capacity, warehouse.max_capacity 
    FROM fish_stock
    JOIN warehouse ON fish_stock.warehouse_id = warehouse.id_warehouse 
    WHERE fish_stock.warehouse_id = ${warehouseId}`;
-    return query[0];
+   return query[0];
 };
 
 const GetFishPrice = async (fishType) => {
@@ -240,7 +240,7 @@ const GenerateInvoice = async (data) => {
         ...options,
         timeout: 100000,
     });
-    
+
     await fs.promises.writeFile(outputPath, pdfBuffer);
 
     const fileUrl =

@@ -48,7 +48,6 @@ const CreateTransaction = async (req, res) => {
 
         let updatedStock = 0;
         let updatedData;
-        let fileUrl;
 
         const totalPrice = quantity * fishPrice;
 
@@ -88,16 +87,6 @@ const CreateTransaction = async (req, res) => {
             );
 
             const fishType = updatedData.fish_type;
-            const currentDate = moment().utc().format('MMMM D, YYYY');
-            const invoiceData = {
-                quantity,
-                fishType,
-                totalPrice,
-                currentDate,
-                fishPrice,
-            };
-            
-            fileUrl = await TransactionService.GenerateInvoice(invoiceData);
 
             if (updatedStock >= validateStock.maxStock) {
                 NotificationService.SendNotification(
@@ -123,16 +112,6 @@ const CreateTransaction = async (req, res) => {
 
             const fishType = updatedData.fish_type;
 
-            const currentDate = moment().utc().format('MMMM D, YYYY');
-            const invoiceData = {
-                quantity,
-                fishType,
-                totalPrice,
-                currentDate,
-                fishPrice,
-            };
-            fileUrl = await TransactionService.GenerateInvoice(invoiceData);
-
             if (updatedStock <= validateStock.minStock) {
                 NotificationService.SendNotification(
                     firebaseToken.fcm_token,
@@ -141,12 +120,7 @@ const CreateTransaction = async (req, res) => {
             }
         }
 
-        const response = {
-            ...updatedData,
-            file_url: fileUrl,
-        };
-
-        return res.successWithData(response, 'Transaction success');
+        return res.successWithData(updatedData, 'Transaction success');
     } catch (error) {
         Logger.error(
             `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`
@@ -177,10 +151,48 @@ const GetTransactionHistory = async (req, res) => {
     }
 };
 
+/**
+ * Handles the creation of a group transaction for fish stocks, either adding or deducting stock
+ * based on the transaction type. Validates the stock details and warehouse capacity before
+ * proceeding with the transaction.
+ *
+ * @param {Object} req - The request object containing the transaction details.
+ * @param {Object} req.body - The body of the request.
+ * @param {Array<Object>} req.body.fish - An array of fish objects, each containing information
+ * such as type, quantity, etc.
+ * @param {number} req.body.warehouse_id - The ID of the warehouse where the transaction takes place.
+ * @param {string} req.body.transaction_type - The type of transaction, either "ADD" or "DEDUCT".
+ * @param {number} [req.body.supplier_id] - The ID of the supplier (required for "ADD" transactions).
+ * @param {Object} req.user - The user object extracted from the authenticated session.
+ * @param {number} req.user.user_id - The ID of the user performing the transaction.
+ * @param {Object} res - The response object used to send back the appropriate HTTP response.
+ * @returns {Promise<Object>} - A response with a status, transaction ID, message, and an array of
+ * fish stock data if the transaction is successful.
+ *
+ * @throws {BusinessException} - Throws a business exception if the stock exceeds the warehouse capacity
+ * or if the quantity exceeds limits set by the business rules.
+ *
+ * @example
+ * {
+ *   "status": true,
+ *   "transaction_id": "EFSH1108162456",
+ *   "message": "Transaction success",
+ *   "data": [
+ *     {
+ *       "id_fish_stock": "chub-mackerel-1",
+ *       "fish_type": "Chub mackerel",
+ *       "warehouse_id": 1,
+ *       "quantity": 51,
+ *       "total_price": 1329004,
+ *       "min_stock": 10,
+ *       "max_stock": 70
+ *     }
+ *   ]
+ * }
+ */
 const CreateGroupTransaction = async (req, res) => {
     const { fish, warehouse_id, transaction_type, supplier_id } = req.body;
     const { user_id } = req.user;
-
     try {
         // prettier-ignore
         if (transaction_type === TransactionType.ADD && !supplier_id) {
@@ -190,6 +202,7 @@ const CreateGroupTransaction = async (req, res) => {
         let data;
         // prettier-ignore
         const fishDetail = await TransactionService.ValidateGroupStock({ fish, warehouse_id });
+        console.log(fishDetail, 'HERE FISH DETAIL');
 
         const totalQuantityAllFish = sumBy(fish, 'quantity');
         // prettier-ignore
@@ -203,11 +216,18 @@ const CreateGroupTransaction = async (req, res) => {
             data = await _addTransactionGroup({
                 fishPayload: fish,
                 fishDetail,
+                userId: user_id,
+                supplierId: supplier_id,
             });
         } else {
-            data = _deductTransactiionGroup();
+            data = _deductTransactionGroup({
+                fishPayload: fish,
+                fishDetail,
+                userId: user_id,
+                supplierId: supplier_id,
+            });
         }
-        return res.successWithData(fishDetail, 'Transaction success');
+        return res.successWithData(data, 'Transaction success');
     } catch (error) {
         Logger.error(
             `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`
@@ -216,22 +236,74 @@ const CreateGroupTransaction = async (req, res) => {
     }
 };
 
-const _addTransactionGroup = async ({ fishPayload, fishDetail }) => {
+// prettier-ignore
+const _addTransactionGroup = async ({ fishPayload, fishDetail, userId, supplierId }) => {
+    const results = [];
     for (let i = 0; i < fishPayload.length; i++) {
         const payload = fishPayload[i];
         const detail = fishDetail[i];
 
         const maxQuantity = detail.maxStock;
         const totalExpectedQuantity = payload.quantity + detail.quantity;
+        const currentTotalPrice = detail.totalPrice;
+        const totalPrice = payload.quantity * detail.price;
+        const fish_stock_id = detail.fishStockId;
+
+        const fishStockData = {
+            fish_stock_id,
+            quantity: payload.quantity,
+            user_id: userId,
+            totalPrice,
+            currentTotalPrice,
+            supplierId,
+        };
 
         // prettier-ignore
         if (totalExpectedQuantity > maxQuantity) throw BusinessException.quantityExceedLimit();
 
-        // const updatedData =
+        const updatedData = await TransactionService.AddFishStock(
+            fishStockData,
+            detail.quantity
+        );
+        results.push(updatedData);
     }
+    return results;
 };
 
-const _deductTransactiionGroup = () => {};
+// prettier-ignore
+const _deductTransactionGroup = async ({ fishPayload, fishDetail, userId, supplierId }) => {
+    const results = [];
+    for (let i = 0; i <= fishPayload.length - 1; i++) {
+        const payload = fishPayload[i];
+        const detail = fishDetail[i];
+
+        const minQuantity = detail.minStock;
+        const totalExpectedQuantity = detail.quantity - payload.quantity;
+        const currentTotalPrice = detail.totalPrice;
+        const totalPrice = payload.quantity * detail.price;
+        const fish_stock_id = detail.fishStockId;
+
+
+        const fishStockData = {
+            fish_stock_id,
+            quantity: payload.quantity,
+            user_id: userId,
+            totalPrice,
+            currentTotalPrice,
+            supplierId,
+        };
+
+        // prettier-ignore
+        if (totalExpectedQuantity < minQuantity) throw BusinessException.quantityExceedLimit();
+
+        const updatedData = await TransactionService.DeductFishStock(
+            fishStockData,
+            detail.quantity
+        );
+        results.push(updatedData);
+    }
+    return results;
+};
 module.exports = {
     CreateTransaction,
     CreateGroupTransaction,
