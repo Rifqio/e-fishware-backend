@@ -2,7 +2,6 @@ const { TransactionType } = require('../utils/constants');
 const { Logger } = require('../utils/logger');
 const TransactionService = require('../service/TransactionService');
 const NotificationService = require('../service/NotificationService');
-const moment = require('moment');
 const { BusinessException } = require('../utils/exception/Exception');
 const { sumBy } = require('lodash');
 
@@ -120,7 +119,10 @@ const CreateTransaction = async (req, res) => {
             }
         }
 
-        return res.successWithData(updatedData, 'Transaction success');
+        return res.successWithData(
+            { ...updatedData, total_price: totalPrice },
+            'Transaction success'
+        );
     } catch (error) {
         Logger.error(
             `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`
