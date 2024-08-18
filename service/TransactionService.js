@@ -66,13 +66,51 @@ const ValidateGroupStock = async ({ fish, warehouse_id }) => {
     return mappedFish;
 };
 
+const GetManyFishPrice = async (fish) => {
+    const prices = await Promise.all(
+        fish.map(async (data) => {
+            const fishData = await DB.fish.findFirst({
+                where: {
+                    id_fish: data.id_fish,
+                },
+                select: {
+                    price: true,
+                },
+            });
+
+            return fishData ? fishData.price : null;
+        })
+    );
+
+    return prices;
+};
+
+const ConvertToFishWarehouseID = async (fish, warehouseId) => {
+    const fishWarehouseID = await Promise.all(
+        fish.map(async (data) => {
+            const fishData = await DB.fish.findFirst({
+                where: {
+                    id_fish: data.id_fish,
+                },
+                select: {
+                    type: true,
+                },
+            });
+            const type = fishData ? fishData.type : null;
+            const convertedFish = type.toLowerCase().replace(/\s+/g, '-') + '-' + warehouseId;
+            return { convertedFish, fishType: type };
+        })
+    );
+    return fishWarehouseID;
+};
+
 const GetWarehouseCapacity = async (warehouseId) => {
-   const query = await DB.$queryRaw`
+    const query = await DB.$queryRaw`
    SELECT SUM(fish_stock.quantity) AS filled_capacity, warehouse.max_capacity 
    FROM fish_stock
    JOIN warehouse ON fish_stock.warehouse_id = warehouse.id_warehouse 
    WHERE fish_stock.warehouse_id = ${warehouseId}`;
-   return query[0];
+    return query[0];
 };
 
 const GetFishPrice = async (fishType) => {
@@ -273,6 +311,8 @@ module.exports = {
     ValidateFishStock,
     GetTransactionHistory,
     GenerateToPdf,
+    GetManyFishPrice,
+    ConvertToFishWarehouseID,
     GetFirebaseToken,
     GetWarehouseCapacity,
     GetFishPrice,

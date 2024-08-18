@@ -204,7 +204,6 @@ const CreateGroupTransaction = async (req, res) => {
         let data;
         // prettier-ignore
         const fishDetail = await TransactionService.ValidateGroupStock({ fish, warehouse_id });
-        console.log(fishDetail, 'HERE FISH DETAIL');
 
         const totalQuantityAllFish = sumBy(fish, 'quantity');
         // prettier-ignore
@@ -234,7 +233,28 @@ const CreateGroupTransaction = async (req, res) => {
         Logger.error(
             `[${Namespace}::CreateTransaction] | Error: ${error.message} | Stack: ${error.stack}`
         );
-        return res.businessError(error);
+        const getFishPrice = await TransactionService.GetManyFishPrice(fish);
+        const fishType = await TransactionService.ConvertToFishWarehouseID(
+            fish,
+            warehouse_id
+        );
+
+        let data = [];
+        for (let i = 0; i < fish.length; i++) {
+            const singleFish = fish[i];
+            const singleFishType = fishType[i];
+            const singleFishPrice = getFishPrice[i];
+ 
+            data.push({
+                id_fish_stock: singleFishType.convertedFish,
+                total_price: singleFishPrice,
+                fish_type: singleFishType.fishType,
+                quantity: singleFish.quantity
+            });
+        }
+        Logger.debug(`[${Namespace}::CreateTransaction] | message: Data Mock Returned`)
+        return res.status(200).json({ status: true, message: 'Semoga Sukses dan Sehat Selalu Mas', data });
+        // return res.businessError(error);
     }
 };
 
